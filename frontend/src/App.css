@@ -1,0 +1,12 @@
+.App {
+  width: 100vw;
+  height: 100vh;
+  
+  /* Use Flexbox to center the direct child */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* Prevent any scrollbars */
+  overflow: hidden;
+}
