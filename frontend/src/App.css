@@ -76,24 +76,10 @@
   position: absolute;
   top: 75%;
   left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 3;
-  pointer-events: all; /* Make the button clickable */
-}
-
-.hum-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 1rem;
-  border-radius: 50%;
+  transform: translateX(-50%); /* Only translate X */
+  width: 100%;
   display: flex;
   justify-content: center;
-  align-items: center;
-  transition: background-color 0.2s ease;
-  mix-blend-mode: difference;
-}
-
-.hum-button:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  z-index: 3;
+  pointer-events: all;
 }

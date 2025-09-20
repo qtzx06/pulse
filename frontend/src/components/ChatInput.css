@@ -11,8 +11,15 @@
   pointer-events: all;
 }
 
-.chat-input {
+.input-wrapper {
+  position: relative;
   flex-grow: 1;
+  display: flex;
+  align-items: center;
+}
+
+.chat-input {
+  width: 100%;
   background: none;
   border: none;
   outline: none;
@@ -20,10 +27,22 @@
   font-size: 1.2rem;
   color: black; /* This will be inverted */
   margin: 0 1rem;
+  position: relative;
+  z-index: 2;
 }
 
-.chat-input::placeholder {
-  color: #888; /* A lighter grey for the placeholder */
+.placeholder-animation {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: "Geist", sans-serif;
+  font-size: 1.2rem;
+  color: #888;
+  z-index: 1;
+  pointer-events: none; /* Allow clicks to pass through to the input */
+  display: flex;
+  white-space: pre; /* Keep the space after "i'm feeling..." */
 }
 
 .chat-button {
