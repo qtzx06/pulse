@@ -1,9 +1,10 @@
-import React, { useRef, useEffect, memo } from 'react';
+
+import React, { useRef, useEffect } from 'react';
 import vertShaderSource from '../shaders/neuro.vert?raw';
 import fragShaderSource from '../shaders/neuro.frag?raw';
 import './NeuroShaderCanvas.css';
 
-const NeuroShaderCanvas: React.FC = memo(() => {
+const NeuroShaderCanvas: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -131,6 +132,6 @@ const NeuroShaderCanvas: React.FC = memo(() => {
     }, []);
 
     return <canvas id="neuro" ref={canvasRef}></canvas>;
-});
+};
 
 export default NeuroShaderCanvas;

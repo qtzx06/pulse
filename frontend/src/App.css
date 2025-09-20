@@ -25,6 +25,13 @@
   background-color: white;
   mix-blend-mode: difference;
   z-index: 1;
+  clip-path: url(#wave-clip);
+}
+
+.clip-svg {
+  position: absolute;
+  width: 0;
+  height: 0;
 }
 
 .title-and-button-container {
@@ -41,8 +48,9 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  font-family: "Geist", sans-serif;
   font-size: 12rem;
-  font-weight: 900;
+  font-weight: 800;
   margin: 0;
   color: white;
   mix-blend-mode: difference;
@@ -51,7 +59,7 @@
 
 .center-button {
   position: absolute;
-  top: 50%;
+  top: 75%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 3;
