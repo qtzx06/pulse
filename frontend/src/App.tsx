@@ -203,7 +203,7 @@ function App() {
           animate={{ opacity: 1 }}
           transition={{ delay: 2.5 }}
         >
-          <ChatInput onToggleHumming={toggleHumming} />
+          <ChatInput />
         </motion.div>
       </div>
     </div>
