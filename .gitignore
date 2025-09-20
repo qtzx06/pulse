@@ -1,0 +1,28 @@
+# Dependencies
+/node_modules
+/frontend/node_modules
+/backend/venv
+
+# Vite cache
+.vite/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Build artifacts
+/build
+/dist
+*.egg-info
+
+# Local environment files
+.env
+.env.*
+*.env
+
+# Temporary files
+/backend/uploads/
+/backend/generated/
+*.DS_Store

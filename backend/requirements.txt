@@ -1,0 +1,9 @@
+replicate
+pydub
+langchain
+langchain-google-genai
+python-dotenv
+requests
+Flask
+Flask-Cors
+protobuf==3.20.3
