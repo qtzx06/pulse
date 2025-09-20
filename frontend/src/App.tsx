@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
+import { motion, Variants } from 'framer-motion';
 import NeuroShaderCanvas from './components/NeuroShaderCanvas';
 import ChatInput from './components/ChatInput';
 import { useMicrophone, MicrophoneState } from './context/MicrophoneContextProvider';
@@ -8,7 +8,7 @@ import './App.css';
 const title = "PULSE";
 
 // --- SVG Path Smoothing Helpers ---
-const line = (pointA, pointB) => {
+const line = (pointA: any, pointB: any) => {
   const lengthX = pointB[0] - pointA[0];
   const lengthY = pointB[1] - pointA[1];
   return {
@@ -17,7 +17,7 @@ const line = (pointA, pointB) => {
   };
 };
 
-const controlPoint = (current, previous, next, reverse, smoothing = 0.2) => {
+const controlPoint = (current: any, previous: any, next: any, reverse: any, smoothing = 0.2) => {
   const p = previous || current;
   const n = next || current;
   const l = line(p, n);
@@ -28,15 +28,15 @@ const controlPoint = (current, previous, next, reverse, smoothing = 0.2) => {
   return [x, y];
 };
 
-const bezierCommand = (point, i, a) => {
-  const [cpsX, cpsY] = controlPoint(a[i - 1], a[i - 2], point);
+const bezierCommand = (point: any, i: any, a: any) => {
+  const [cpsX, cpsY] = controlPoint(a[i - 1], a[i - 2], point, false);
   const [cpeX, cpeY] = controlPoint(point, a[i - 1], a[i + 1], true);
   return `C ${cpsX},${cpsY} ${cpeX},${cpeY} ${point[0]},${point[1]}`;
 };
 
-const svgPath = (points) => {
+const svgPath = (points: any) => {
   return points.reduce(
-    (acc, point, i, a) =>
+    (acc: any, point: any, i: any, a: any) =>
       i === 0
         ? `M ${point[0]},${point[1]}`
         : `${acc} ${bezierCommand(point, i, a)}`,
@@ -46,7 +46,7 @@ const svgPath = (points) => {
 // --- End of SVG Path Smoothing Helpers ---
 
 
-const titleContainerVariants = {
+const titleContainerVariants: Variants = {
   hidden: {},
   visible: {
     transition: {
@@ -56,7 +56,7 @@ const titleContainerVariants = {
   },
 };
 
-const letterVariants = {
+const letterVariants: Variants = {
   hidden: (i: number) => {
     if (i < 2) return { x: -100, opacity: 0 }; // P, U from left
     if (i > 2) return { x: 100, opacity: 0 };  // S, E from right
@@ -66,7 +66,7 @@ const letterVariants = {
     x: 0,
     y: 0,
     opacity: 1,
-    transition: { type: 'spring', stiffness: 120 },
+    transition: { type: 'spring', stiffness: 50, damping: 15 }, // Slower and smoother spring
   },
 };
 

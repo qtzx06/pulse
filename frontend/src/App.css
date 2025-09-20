@@ -60,7 +60,7 @@
 
 .subtitle {
   position: absolute;
-  top: 62%; /* Position below the title */
+  top: 65%; /* Moved down slightly */
   left: 50%;
   transform: translate(-50%, -50%);
   font-family: "Geist", sans-serif;

@@ -39,7 +39,8 @@ const NeuroShaderCanvas: React.FC = () => {
         renderLoop();
 
         function initShader(): WebGLRenderingContext | null {
-            const gl = canvasEl.getContext('webgl') || canvasEl.getContext('experimental-webgl');
+            if (!canvasEl) return null;
+            const gl = (canvasEl.getContext('webgl') || canvasEl.getContext('experimental-webgl')) as WebGLRenderingContext;
             if (!gl) {
                 alert('WebGL is not supported by your browser.');
                 return null;
@@ -108,7 +109,7 @@ const NeuroShaderCanvas: React.FC = () => {
         }
 
         function resizeCanvas() {
-            if (!gl) return;
+            if (!gl || !canvasEl) return;
             canvasEl.width = window.innerWidth * devicePixelRatio;
             canvasEl.height = window.innerHeight * devicePixelRatio;
             gl.uniform1f(uniforms.u_ratio, canvasEl.width / canvasEl.height);
