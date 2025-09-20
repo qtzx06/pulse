@@ -76,42 +76,24 @@ function App() {
   const pathRef = useRef<SVGPathElement>(null);
   const barRef = useRef<HTMLDivElement>(null);
   const animationFrameId = useRef<number>();
-  const mousePos = useRef({ x: -999, y: -999 });
-  const animatedMousePos = useRef({ x: -999, y: -999 });
 
   useEffect(() => {
     setupMicrophone();
   }, [setupMicrophone]);
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      mousePos.current = { x: e.clientX, y: e.clientY };
-    };
-
     const animateWave = (timestamp: number) => {
       if (!pathRef.current || !barRef.current) return;
 
       const barRect = barRef.current.getBoundingClientRect();
       const headroom = 50;
 
-      animatedMousePos.current.x += (mousePos.current.x - animatedMousePos.current.x) * 0.05;
-      animatedMousePos.current.y += (mousePos.current.y - animatedMousePos.current.y) * 0.05;
-      
-      const mouseX = animatedMousePos.current.x - barRect.left;
-      const mouseY = animatedMousePos.current.y - barRect.top;
-
       const points = [];
       const segments = 50;
       for (let i = 0; i <= segments; i++) {
         const x = (barRect.width / segments) * i;
-        
         const sineWave = Math.sin(x * 0.01 + timestamp * 0.002) * 10;
-
-        const mouseDist = Math.abs(x - mouseX);
-        const proximity = Math.max(0, 1 - mouseDist / 200);
-        const mouseEffect = Math.pow(proximity, 3) * 60 * Math.max(0, 1 - mouseY / (150 + headroom));
-
-        points.push([x, headroom + sineWave + mouseEffect]);
+        points.push([x, headroom + sineWave]);
       }
 
       const smoothPath = svgPath(points);
@@ -124,11 +106,9 @@ function App() {
       animationFrameId.current = requestAnimationFrame(animateWave);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
     animationFrameId.current = requestAnimationFrame(animateWave);
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
       }
@@ -181,7 +161,7 @@ function App() {
         ref={barRef}
         className="inverter-bar"
         initial={{ y: '-100vh' }}
-        animate={{ y: '-50px' }} // Animate to -50px to create headroom
+        animate={{ y: '0px' }} // Animate to -50px to create headroom
         transition={{
           type: 'tween',
           ease: [0.4, 0, 0.2, 1],
@@ -208,6 +188,14 @@ function App() {
             </motion.span>
           ))}
         </motion.div>
+        <motion.p
+          className="subtitle"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2.8 }}
+        >
+          hum a tune.
+        </motion.p>
         <motion.div
           className="center-button"
           initial={{ opacity: 0 }}

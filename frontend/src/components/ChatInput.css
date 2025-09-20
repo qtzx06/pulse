@@ -1,0 +1,42 @@
+.chat-input-container {
+  display: flex;
+  align-items: center;
+  width: 80%;
+  max-width: 700px;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  background-color: white;
+  mix-blend-mode: difference;
+  z-index: 3;
+  pointer-events: all;
+}
+
+.chat-input {
+  flex-grow: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: "Geist", sans-serif;
+  font-size: 1.2rem;
+  color: black; /* This will be inverted */
+  margin: 0 1rem;
+}
+
+.chat-input::placeholder {
+  color: #888; /* A lighter grey for the placeholder */
+}
+
+.chat-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-button svg {
+  width: 28px;
+  height: 28px;
+}

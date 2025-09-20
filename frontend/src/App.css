@@ -49,12 +49,27 @@
   left: 50%;
   transform: translate(-50%, -50%);
   font-family: "Geist", sans-serif;
-  font-size: 12rem;
-  font-weight: 800;
+  font-size: 17rem;
+  font-weight: 50;
   margin: 0;
   color: white;
   mix-blend-mode: difference;
   z-index: 2;
+  white-space: nowrap; /* Prevent the title from wrapping */
+}
+
+.subtitle {
+  position: absolute;
+  top: 62%; /* Position below the title */
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: "Geist", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: white;
+  mix-blend-mode: difference;
+  z-index: 2;
+  text-transform: lowercase;
 }
 
 .center-button {
