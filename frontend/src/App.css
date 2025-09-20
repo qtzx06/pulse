@@ -1,12 +1,76 @@
 .App {
   width: 100vw;
   height: 100vh;
-  
-  /* Use Flexbox to center the direct child */
+  overflow: hidden;
+  position: relative;
+  background-color: transparent; /* Allow shader to be visible */
+}
+
+.white-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  z-index: 10;
+}
+
+.inverter-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 50vh;
+  width: 100%;
+  background-color: white;
+  mix-blend-mode: difference;
+  z-index: 1;
+}
+
+.title-and-button-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Allow clicks to go to the button */
+}
+
+.center-title {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12rem;
+  font-weight: 900;
+  margin: 0;
+  color: white;
+  mix-blend-mode: difference;
+  z-index: 2;
+}
+
+.center-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  pointer-events: all; /* Make the button clickable */
+}
+
+.hum-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 1rem;
+  border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: background-color 0.2s ease;
+  mix-blend-mode: difference;
+}
 
-  /* Prevent any scrollbars */
-  overflow: hidden;
+.hum-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
 }
