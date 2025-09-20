@@ -6,7 +6,44 @@ import './App.css';
 
 const title = "PULSE";
 
-// ... (variants remain the same)
+// --- SVG Path Smoothing Helpers ---
+const line = (pointA, pointB) => {
+  const lengthX = pointB[0] - pointA[0];
+  const lengthY = pointB[1] - pointA[1];
+  return {
+    length: Math.sqrt(Math.pow(lengthX, 2) + Math.pow(lengthY, 2)),
+    angle: Math.atan2(lengthY, lengthX),
+  };
+};
+
+const controlPoint = (current, previous, next, reverse, smoothing = 0.2) => {
+  const p = previous || current;
+  const n = next || current;
+  const l = line(p, n);
+  const angle = l.angle + (reverse ? Math.PI : 0);
+  const length = l.length * smoothing;
+  const x = current[0] + Math.cos(angle) * length;
+  const y = current[1] + Math.sin(angle) * length;
+  return [x, y];
+};
+
+const bezierCommand = (point, i, a) => {
+  const [cpsX, cpsY] = controlPoint(a[i - 1], a[i - 2], point);
+  const [cpeX, cpeY] = controlPoint(point, a[i - 1], a[i + 1], true);
+  return `C ${cpsX},${cpsY} ${cpeX},${cpeY} ${point[0]},${point[1]}`;
+};
+
+const svgPath = (points) => {
+  return points.reduce(
+    (acc, point, i, a) =>
+      i === 0
+        ? `M ${point[0]},${point[1]}`
+        : `${acc} ${bezierCommand(point, i, a)}`,
+    ''
+  );
+};
+// --- End of SVG Path Smoothing Helpers ---
+
 
 const titleContainerVariants = {
   hidden: {},
@@ -55,8 +92,8 @@ function App() {
       if (!pathRef.current || !barRef.current) return;
 
       const barRect = barRef.current.getBoundingClientRect();
+      const headroom = 50;
 
-      // Smoothly follow the mouse
       animatedMousePos.current.x += (mousePos.current.x - animatedMousePos.current.x) * 0.05;
       animatedMousePos.current.y += (mousePos.current.y - animatedMousePos.current.y) * 0.05;
       
@@ -64,24 +101,23 @@ function App() {
       const mouseY = animatedMousePos.current.y - barRect.top;
 
       const points = [];
-      const segments = 100; // More segments for a smoother curve
+      const segments = 50;
       for (let i = 0; i <= segments; i++) {
         const x = (barRect.width / segments) * i;
         
-        // Base wave
         const sineWave = Math.sin(x * 0.01 + timestamp * 0.002) * 10;
 
-        // Mouse interaction (a bell curve based on mouse proximity)
         const mouseDist = Math.abs(x - mouseX);
-        const proximity = Math.max(0, 1 - mouseDist / 200); // 200 is the radius of influence
-        const mouseEffect = Math.pow(proximity, 2) * 50 * Math.max(0, 1 - mouseY / 150);
+        const proximity = Math.max(0, 1 - mouseDist / 200);
+        const mouseEffect = Math.pow(proximity, 3) * 60 * Math.max(0, 1 - mouseY / (150 + headroom));
 
-        points.push([x, Math.min(barRect.height, sineWave + mouseEffect)]);
+        points.push([x, headroom + sineWave + mouseEffect]);
       }
 
+      const smoothPath = svgPath(points);
+
       const pathData =
-        `M 0 ${points[0][1]}` +
-        points.map(p => ` L ${p[0]} ${p[1]}`).join('') +
+        smoothPath +
         ` L ${barRect.width} ${barRect.height} L 0 ${barRect.height} Z`;
 
       pathRef.current.setAttribute('d', pathData);
@@ -145,7 +181,7 @@ function App() {
         ref={barRef}
         className="inverter-bar"
         initial={{ y: '-100vh' }}
-        animate={{ y: '0' }}
+        animate={{ y: '-50px' }} // Animate to -50px to create headroom
         transition={{
           type: 'tween',
           ease: [0.4, 0, 0.2, 1],
