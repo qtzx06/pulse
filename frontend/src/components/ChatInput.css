@@ -9,3 +9,16 @@
   pointer-events: none;
   z-index: 2;
 }
+
+.recording-timer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.7);
+  z-index: 2;
+}
+
+

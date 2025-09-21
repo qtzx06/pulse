@@ -14,12 +14,16 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [fftData, setFftData] = useState(new Uint8Array(0));
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const mediaStreamSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const setupMicrophone = async () => {
     try {
@@ -27,13 +31,24 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
       streamRef.current = stream;
       audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
       analyserRef.current = audioContextRef.current.createAnalyser();
-      analyserRef.current.fftSize = 32;
+      analyserRef.current.fftSize = 256;
       mediaStreamSourceRef.current = audioContextRef.current.createMediaStreamSource(stream);
       mediaStreamSourceRef.current.connect(analyserRef.current);
       
       const bufferLength = analyserRef.current.frequencyBinCount;
       const dataArray = new Uint8Array(bufferLength);
       setFftData(dataArray);
+
+      mediaRecorderRef.current = new MediaRecorder(stream);
+      const chunks: BlobPart[] = [];
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        chunks.push(event.data);
+      };
+      mediaRecorderRef.current.onstop = () => {
+        const blob = new Blob(chunks, { type: 'audio/webm' });
+        setRecordedBlob(blob);
+      };
+
     } catch (err) {
       console.error('Error accessing microphone:', err);
     }
@@ -41,8 +56,13 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
 
   const startRecording = () => {
     if (isRecording) return;
+    setRecordedBlob(null);
     setupMicrophone().then(() => {
       setIsRecording(true);
+      mediaRecorderRef.current?.start();
+      recordingIntervalRef.current = setInterval(() => {
+        setRecordingTime(prevTime => prevTime + 1);
+      }, 1000);
       const draw = () => {
         if (analyserRef.current) {
           const bufferLength = analyserRef.current.frequencyBinCount;
@@ -61,6 +81,10 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
+    if (recordingIntervalRef.current) {
+      clearInterval(recordingIntervalRef.current);
+    }
+    mediaRecorderRef.current?.stop();
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
     }
@@ -68,15 +92,51 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
       audioContextRef.current.close();
     }
     setIsRecording(false);
+    setRecordingTime(0);
     setFftData(new Uint8Array(0));
   };
 
-  const toggleHumming = () => {
+  const clearRecording = () => {
+    setRecordedBlob(null);
+  };
+
+  const handleLeftButtonClick = () => {
     if (isRecording) {
       stopRecording();
+    } else if (recordedBlob) {
+      clearRecording();
     } else {
       startRecording();
     }
+  };
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60).toString().padStart(2, '0');
+    const seconds = (time % 60).toString().padStart(2, '0');
+    return `${minutes}:${seconds}`;
+  };
+
+  const getLeftButtonIcon = () => {
+    if (isRecording) {
+      return (
+        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6 6h12v12H6z" />
+        </svg>
+      );
+    }
+    if (recordedBlob) {
+      return (
+        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </svg>
+      );
+    }
+    return (
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" fill="currentColor"/>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2H3v2a9 9 0 0 0 8 8.94V24h2v-3.06A9 9 0 0 0 21 12v-2h-2z" fill="currentColor"/>
+      </svg>
+    );
   };
 
   return (
@@ -90,25 +150,16 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
       }}
     >
       <div className={`search-field-wrapper ${isInputFocused ? 'focused' : ''}`}>
-        {isRecording && (
-          <div className="voice-visualizer-container">
-            <PulseVisualizer fftData={fftData} width={200} height={30} />
-          </div>
-        )}
-        <button onClick={toggleHumming} className="chat-button mic-button">
-          {isRecording ? (
-            <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 6h12v12H6z" />
-            </svg>
-          ) : (
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" fill="currentColor"/>
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2H3v2a9 9 0 0 0 8 8.94V24h2v-3.06A9 9 0 0 0 21 12v-2h-2z" fill="currentColor"/>
-            </svg>
-          )}
+        <button onClick={handleLeftButtonClick} className="chat-button mic-button">
+          {getLeftButtonIcon()}
         </button>
         
         <div className="input-wrapper">
+          {isRecording && (
+            <div className="voice-visualizer-container">
+              <PulseVisualizer fftData={fftData} width={450} height={30} />
+            </div>
+          )}
           <input 
             type="text" 
             className="search-input" 
@@ -132,11 +183,17 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
           )}
         </div>
 
-        <button onClick={onSend} className="chat-button send-button">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor"/>
-          </svg>
-        </button>
+        {isRecording ? (
+          <div className="recording-timer">
+            {formatTime(recordingTime)}
+          </div>
+        ) : (
+          <button onClick={onSend} className="chat-button send-button">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor"/>
+            </svg>
+          </button>
+        )}
 
         {/* Laser tracing effect */}
         <div className="laser-trace top"></div>
