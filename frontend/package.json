@@ -13,7 +13,8 @@
     "framer-motion": "^12.23.16",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-type-animation": "^3.2.0"
+    "react-type-animation": "^3.2.0",
+    "react-voice-visualizer": "^2.0.8"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",

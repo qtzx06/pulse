@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, Variants, AnimatePresence } from 'framer-motion';
 import NeuroShaderCanvas from './components/NeuroShaderCanvas';
 import ChatInput from './components/ChatInput';
-import { useMicrophone } from './context/MicrophoneContextProvider';
 import './App.css';
 
 const title = "PULSE";
@@ -72,7 +71,6 @@ const letterVariants: Variants = {
 
 
 function App() {
-  const { setupMicrophone } = useMicrophone();
   const pathRef = useRef<SVGPathElement>(null);
   const barRef = useRef<HTMLDivElement>(null);
   const animationFrameId = useRef<number>();
@@ -81,10 +79,6 @@ function App() {
   const handleSend = () => {
     setIsExpanded(true);
   };
-
-  useEffect(() => {
-    setupMicrophone();
-  }, [setupMicrophone]);
 
   useEffect(() => {
     const animateWave = (timestamp: number) => {

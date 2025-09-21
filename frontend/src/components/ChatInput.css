@@ -1,67 +1,11 @@
-.chat-input-container {
-  display: flex;
-  align-items: center;
-  width: 80%;
-  max-width: 700px;
-  padding: 0.5rem 1rem;
-  border-radius: 2rem;
-  background-color: white;
-  mix-blend-mode: difference;
-  z-index: 3;
-  pointer-events: all;
-  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-.chat-input-container:hover {
-  transform: scale(1.02);
-}
-
-.input-wrapper {
-  position: relative;
-  flex-grow: 1;
-  display: flex;
-  align-items: center;
-}
-
-.chat-input {
-  width: 100%;
-  background: none;
-  border: none;
-  outline: none;
-  font-family: "Geist", sans-serif;
-  font-size: 1.2rem;
-  color: black; /* This will be inverted */
-  margin: 0 1rem;
-  position: relative;
-  z-index: 2;
-}
-
-.placeholder-animation {
+.voice-visualizer-container {
   position: absolute;
-  left: 1rem;
   top: 50%;
-  transform: translateY(-50%);
-  font-family: "Geist", sans-serif;
-  font-size: 1.2rem;
-  color: #888;
-  z-index: 1;
-  pointer-events: none; /* Allow clicks to pass through to the input */
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
-  white-space: pre; /* Keep the space after "i'm feeling..." */
-}
-
-.chat-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.5rem;
-  display: flex;
-  align-items: center;
   justify-content: center;
-}
-
-.chat-button svg {
-  width: 28px;
-  height: 28px;
+  align-items: center;
+  pointer-events: none;
+  z-index: 2;
 }
