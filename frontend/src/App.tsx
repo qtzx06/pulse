@@ -168,7 +168,8 @@ function App() {
         className="inverter-bar"
         initial={{ y: '100vh' }}
         animate={{
-          y: isExpanded ? '-50px' : 'calc(50vh - 50px)'
+          y: '0px',
+          height: isExpanded ? 'calc(100vh + 150px)' : 'calc(50vh + 50px)'
         }}
         transition={{
           type: 'tween',
