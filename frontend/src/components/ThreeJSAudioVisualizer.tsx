@@ -30,35 +30,41 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
 
     const group = new THREE.Group();
     groupRef.current = group;
-    group.scale.set(0.6, 0.6, 0.6);
+    group.scale.set(0.4, 0.4, 0.4); // Smaller initial scale
     scene.add(group);
 
-    // Use a more complex TorusKnot geometry for a "cool design"
     const geometry = new THREE.TorusKnotGeometry(8, 1.2, 256, 20);
     
     const shaderMaterial = new THREE.ShaderMaterial({
       uniforms: {
-        lightDirection: { value: new THREE.Vector3(1, 1, 1).normalize() },
+        rimPower: { value: 1.5 },
+        rimIntensity: { value: 1.0 },
       },
       vertexShader: `
         varying vec3 vNormal;
+        varying vec3 vViewPosition;
         void main() {
           vNormal = normalize(normalMatrix * normal);
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+          vViewPosition = -mvPosition.xyz;
+          gl_Position = projectionMatrix * mvPosition;
         }
       `,
       fragmentShader: `
         varying vec3 vNormal;
-        uniform vec3 lightDirection;
+        varying vec3 vViewPosition;
+        uniform float rimPower;
+        uniform float rimIntensity;
         void main() {
-          float intensity = dot(vNormal, lightDirection);
-          float gray;
-          if (intensity > 0.8) gray = 0.1;
-          else if (intensity > 0.4) gray = 0.4;
-          else gray = 0.8;
+          vec3 viewDir = normalize(vViewPosition);
+          float fresnel = 1.0 - dot(viewDir, vNormal);
+          fresnel = pow(fresnel, rimPower) * rimIntensity;
+          float gray = fresnel;
           gl_FragColor = vec4(gray, gray, gray, 1.0);
         }
       `,
+      transparent: true,
+      depthWrite: false, // Prevents z-fighting on self-intersecting geometry
     });
 
     const mesh = new THREE.Mesh(geometry, shaderMaterial);
@@ -161,7 +167,7 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
   useEffect(() => {
     if (isFlickerComplete && groupRef.current) {
       const group = groupRef.current;
-      const targetScale = 1.2;
+      const targetScale = 0.8; // Smaller target scale
       const duration = 1200;
       const startTime = performance.now();
       let animationFrameId: number;
@@ -171,7 +177,7 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
         const progress = Math.min(elapsedTime / duration, 1);
         const easeOutProgress = 1 - Math.pow(1 - progress, 4);
 
-        const currentScale = 0.6 + (targetScale - 0.6) * easeOutProgress;
+        const currentScale = 0.4 + (targetScale - 0.4) * easeOutProgress;
         group.scale.set(currentScale, currentScale, currentScale);
 
         if (progress < 1) {
