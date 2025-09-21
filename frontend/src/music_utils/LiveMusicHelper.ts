@@ -178,4 +178,16 @@ export class LiveMusicHelper extends EventTarget {
     }
   }
 
+  public async updateMusicConfig(config: any, resetContext: boolean) {
+    if (!this.session) return;
+    try {
+        await this.session.setMusicGenerationConfig({ musicGenerationConfig: config });
+        if (resetContext) {
+            await this.session.reset_context();
+        }
+    } catch (e: any) {
+        this.dispatchEvent(new CustomEvent('error', { detail: e.message }));
+    }
+  }
+
 }

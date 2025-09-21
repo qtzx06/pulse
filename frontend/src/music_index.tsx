@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { parsePromptWithGemini } from './controlAgent';
 import type { PlaybackState, Prompt } from './music_types';
 import { GoogleGenAI, LiveMusicFilteredPrompt } from '@google/genai';
 import { PromptDjMidi } from './music_components/PromptDjMidi';
@@ -14,7 +15,7 @@ import { AudioAnalyser } from './music_utils/AudioAnalyser';
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY, apiVersion: 'v1alpha' });
 const model = 'lyria-realtime-exp';
 
-export function main(): LiveMusicHelper {
+export function main() {
   const initialPrompts = buildInitialPrompts();
 
   const pdjMidi = new PromptDjMidi(initialPrompts);
@@ -25,7 +26,6 @@ export function main(): LiveMusicHelper {
 
   const liveMusicHelper = new LiveMusicHelper(ai, model);
   liveMusicHelper.setWeightedPrompts(initialPrompts);
-  
 
   const audioAnalyser = new AudioAnalyser(liveMusicHelper.audioContext);
   liveMusicHelper.extraDestination = audioAnalyser.node;
@@ -35,8 +35,6 @@ export function main(): LiveMusicHelper {
     const prompts = customEvent.detail;
     liveMusicHelper.setWeightedPrompts(prompts);
   }));
-
-  
 
   liveMusicHelper.addEventListener('playback-state-changed', ((e: Event) => {
     const customEvent = e as CustomEvent<PlaybackState>;
@@ -67,7 +65,28 @@ export function main(): LiveMusicHelper {
     pdjMidi.audioLevel = level;
   }));
 
-  return liveMusicHelper;
+  const updateFirstPrompt = async (text: string) => {
+    if (text) {
+      const controlParams = await parsePromptWithGemini(ai, text);
+      if (controlParams) {
+        pdjMidi.updateFirstPrompt(controlParams.prompt || text);
+        
+        const config: any = {};
+        if (controlParams.bpm) config.bpm = controlParams.bpm;
+        if (controlParams.density) config.density = controlParams.density;
+        if (controlParams.brightness) config.brightness = controlParams.brightness;
+
+        if (Object.keys(config).length > 0) {
+          liveMusicHelper.updateMusicConfig(config, !!config.bpm);
+        }
+      } else {
+        // Fallback to the old behavior if the control agent fails
+        pdjMidi.updateFirstPrompt(text);
+      }
+    }
+  };
+
+  return { liveMusicHelper, updateFirstPrompt };
 }
 
 function buildInitialPrompts() {

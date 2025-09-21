@@ -6,7 +6,7 @@ import './Original.css';
 import './ChatInput.css';
 
 interface ChatInputProps {
-  onSend: () => void;
+  onSend: (text: string) => void;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
@@ -123,7 +123,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   };
 
   const handleSend = () => {
-    onSend();
+    onSend(inputValue);
     setInputValue('');
     clearRecording();
   };

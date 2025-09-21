@@ -196,6 +196,16 @@ export class PromptDjMidi extends LitElement {
     this.filteredPrompts = new Set([...this.filteredPrompts, prompt]);
   }
 
+  public updateFirstPrompt(text: string) {
+    const firstController = this.shadowRoot?.querySelector('prompt-controller');
+    if (firstController) {
+      firstController.text = text;
+      firstController.weight = 1.0;
+      // Artificially trigger the event dispatch, just like the knob does.
+      (firstController as any).dispatchPromptChange();
+    }
+  }
+
   override render() {
     const bg = styleMap({
       backgroundImage: this.makeBackground(),

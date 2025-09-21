@@ -78,19 +78,25 @@ function App() {
   const animationFrameId = useRef<number>();
   const [isExpanded, setIsExpanded] = useState(false);
   const musicHelperRef = useRef<LiveMusicHelper | null>(null);
+  const updatePromptRef = useRef<((text: string) => void) | null>(null);
   const [musicStarted, setMusicStarted] = useState(false);
 
   useEffect(() => {
     if (!musicHelperRef.current) {
-      musicHelperRef.current = musicMain();
+      const { liveMusicHelper, updateFirstPrompt } = musicMain();
+      musicHelperRef.current = liveMusicHelper;
+      updatePromptRef.current = updateFirstPrompt;
     }
   }, []);
 
-  const handleSend = () => {
+  const handleSend = (text: string) => {
     setIsExpanded(true);
-    if (musicHelperRef.current && !musicStarted) {
+    if (!musicStarted && musicHelperRef.current) {
       musicHelperRef.current.play();
       setMusicStarted(true);
+    }
+    if (updatePromptRef.current) {
+      updatePromptRef.current(text);
     }
   };
 
