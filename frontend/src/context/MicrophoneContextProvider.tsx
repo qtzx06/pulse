@@ -29,6 +29,7 @@ interface MicrophoneContext {
   stopMicrophone: () => void;
   setupMicrophone: () => void;
   microphoneState: MicrophoneState;
+  audioData: Uint8Array | null;
 }
 
 const MicrophoneContext = createContext<MicrophoneContext>({
@@ -37,6 +38,7 @@ const MicrophoneContext = createContext<MicrophoneContext>({
   stopMicrophone: () => {},
   setupMicrophone: () => {},
   microphoneState: MicrophoneState.NotReady,
+  audioData: null,
 });
 
 const MicrophoneContextProvider = ({
@@ -95,6 +97,7 @@ const MicrophoneContextProvider = ({
         stopMicrophone,
         setupMicrophone,
         microphoneState,
+        audioData: null,
       }}
     >
       {children}

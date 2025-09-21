@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, Variants } from 'framer-motion';
 import NeuroShaderCanvas from './components/NeuroShaderCanvas';
 import ChatInput from './components/ChatInput';
-import { useMicrophone, MicrophoneState } from './context/MicrophoneContextProvider';
+import { useMicrophone } from './context/MicrophoneContextProvider';
 import './App.css';
 
 const title = "PULSE";
@@ -72,8 +72,7 @@ const letterVariants: Variants = {
 
 
 function App() {
-  const [isHumming, setIsHumming] = useState(false);
-  const { setupMicrophone, startMicrophone, stopMicrophone, microphoneState } = useMicrophone();
+  const { setupMicrophone } = useMicrophone();
   const pathRef = useRef<SVGPathElement>(null);
   const barRef = useRef<HTMLDivElement>(null);
   const animationFrameId = useRef<number>();
@@ -121,17 +120,7 @@ function App() {
     };
   }, []);
 
-  const toggleHumming = () => {
-    if (isHumming) {
-      stopMicrophone();
-      setIsHumming(false);
-    } else {
-      if (microphoneState === MicrophoneState.Ready) {
-        startMicrophone();
-        setIsHumming(true);
-      }
-    }
-  };
+  
 
   return (
     <div className="App">
