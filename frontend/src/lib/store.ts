@@ -10,6 +10,6 @@ interface FftStore {
 export const useFftStore = create<FftStore>((set) => ({
   fftData: new Uint8Array(0),
   timeData: new Uint8Array(0),
-  setFftData: (fftData) => set({ fftData }),
-  setTimeData: (timeData) => set({ timeData }),
+  setFftData: (fftData: Uint8Array) => set({ fftData }),
+  setTimeData: (timeData: Uint8Array) => set({ timeData }),
 }));

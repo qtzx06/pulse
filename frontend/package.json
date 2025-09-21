@@ -11,13 +11,17 @@
   },
   "dependencies": {
     "@google/genai": "^1.0.0",
+    "@react-three/fiber": "^9.3.0",
     "framer-motion": "^12.23.16",
     "lit": "^3.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-type-animation": "^3.2.0",
+    "react-use": "^17.6.0",
     "react-voice-visualizer": "^2.0.8",
-    "three": "^0.180.0"
+    "simplex-noise": "^4.0.3",
+    "three": "^0.180.0",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.18.6",
