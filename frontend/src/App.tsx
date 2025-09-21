@@ -82,6 +82,44 @@ function App() {
   const updatePromptRef = useRef<((text: string) => Promise<void>) | null>(null);
   const [musicStarted, setMusicStarted] = useState(false);
   const [isSoundActive, setIsSoundActive] = useState(false);
+  const [animationState, setAnimationState] = useState("hidden");
+
+  useEffect(() => {
+    if (musicStarted && animationState === "hidden") {
+      setAnimationState("glitchIn");
+    }
+  }, [musicStarted, animationState]);
+
+  useEffect(() => {
+    if (isSoundActive) {
+      setAnimationState("active");
+    } else if (animationState === "glitchInDone") {
+      setAnimationState("idle");
+    }
+  }, [isSoundActive, animationState]);
+
+  const visualizerVariants = {
+    hidden: { opacity: 0 },
+    glitchIn: {
+      opacity: [0, 0.8, 0.2, 1, 0.5, 1],
+      transition: { duration: 0.8, delay: 0.3 } // Delay to start after the white overlay fades
+    },
+    idle: {
+      opacity: [1, 0.4, 0.9, 0.6, 1],
+      rotate: 360,
+      transition: {
+        duration: 2.5,
+        repeat: Infinity,
+        repeatType: "mirror",
+        ease: "easeInOut",
+      }
+    },
+    active: {
+      opacity: 1,
+      rotate: 0,
+      transition: { duration: 0.5 }
+    }
+  };
 
   useEffect(() => {
     if (!musicHelperRef.current) {
@@ -134,17 +172,13 @@ function App() {
        <AnimatePresence>
         {musicStarted && musicHelperRef.current && (
           <motion.div
-            initial={{ opacity: 0, rotate: 0 }}
-            animate={{ 
-              opacity: isSoundActive ? 1 : [0, 0.3, 1, 0.1, 0.9, 0.5, 1],
-              rotate: isSoundActive ? 0 : 360,
-            }}
-            transition={{ 
-              duration: 2.0, // Slow down the animation for a smoother feel
-              delay: 0.5,
-              repeat: isSoundActive ? 0 : Infinity,
-              repeatType: "mirror",
-              ease: "easeInOut",
+            variants={visualizerVariants}
+            initial="hidden"
+            animate={animationState}
+            onAnimationComplete={(definition) => {
+              if (definition === "glitchIn") {
+                setAnimationState("glitchInDone");
+              }
             }}
             style={{ position: 'absolute', width: '100%', height: '100%', zIndex: -2 }}
           >
