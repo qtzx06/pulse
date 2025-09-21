@@ -7,7 +7,7 @@ import './App.css';
 import { main as musicMain } from './music_index';
 import { LiveMusicHelper } from './music_utils/LiveMusicHelper';
 
-const title = "PULSE";
+const title = "PULSE.";
 
 // --- SVG Path Smoothing Helpers ---
 const line = (pointA: any, pointB: any) => {
@@ -102,7 +102,7 @@ function App() {
     hidden: { opacity: 0 },
     glitchIn: {
       opacity: [0, 0.8, 0.2, 1, 0.5, 1],
-      transition: { duration: 0.8, delay: 0.3 } // Delay to start after the white overlay fades
+      transition: { duration: 0.8, delay: 0.2 }
     },
     idle: {
       opacity: [1, 0.4, 0.9, 0.6, 1],
@@ -111,7 +111,7 @@ function App() {
         duration: 2.5,
         repeat: Infinity,
         repeatType: "mirror" as const,
-        ease: "easeInOut" as const, // Explicitly cast to the correct type
+        ease: "easeInOut" as const,
       }
     },
     active: {
@@ -265,12 +265,7 @@ function App() {
             </motion.div>
           )}
         </AnimatePresence>
-        <motion.div
-          className="center-button"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2.5 }}
-        >
+        <motion.div className="center-button">
           <ChatInput onSend={handleSend} />
         </motion.div>
       </div>

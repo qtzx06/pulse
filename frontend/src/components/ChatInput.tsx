@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { TypeAnimation } from 'react-type-animation';
 import PulseVisualizer from './PulseVisualizer';
@@ -17,7 +17,8 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   const [recordingTime, setRecordingTime] = useState(0);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [recordedDuration, setRecordedDuration] = useState(0);
-  const [isSending, setIsSending] = useState(false);
+  const [animationState, setAnimationState] = useState("visible");
+  const [hasSentFirst, setHasSentFirst] = useState(false);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -124,10 +125,15 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   };
 
   const handleSend = () => {
+    if (!hasSentFirst) {
+      setAnimationState("glitch");
+      setHasSentFirst(true);
+    } else {
+      setAnimationState("jump");
+    }
     onSend(inputValue);
     setInputValue('');
     clearRecording();
-    setIsSending(true);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -159,24 +165,33 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
     );
   };
 
+  const containerVariants = {
+    visible: { y: 0, opacity: 1, scale: 1, transition: { duration: 0.8, ease: "easeOut", delay: 2.5 } },
+    hidden: { y: -50, opacity: 0, scale: 0.9 },
+    jump: { 
+      y: [0, -5, 0],
+      scale: [1, 1.02, 1],
+      opacity: 1,
+      transition: { duration: 0.3, ease: "easeInOut" }
+    },
+    glitch: {
+      y: 0, // Explicitly set y to 0 to prevent jumping
+      x: [0, 2, 0, -2, 0],
+      scale: [1, 1.01, 1, 0.99, 1],
+      opacity: [1, 0, 1, 0.6, 1],
+      transition: { duration: 0.5, ease: "easeInOut" }
+    }
+  };
+
   return (
     <motion.div
       className="search-container"
+      variants={containerVariants}
       initial="hidden"
-      animate={isSending ? "jump" : "visible"}
-      variants={{
-        visible: { y: 0, opacity: 1, scale: 1, transition: { duration: 0.8, ease: "easeOut" } },
-        hidden: { y: -50, opacity: 0, scale: 0.9 },
-        jump: { 
-          y: [0, -5, 0],
-          scale: [1, 1.02, 1],
-          opacity: 1,
-          transition: { duration: 0.3, ease: "easeInOut" }
-        }
-      }}
+      animate={animationState}
       onAnimationComplete={() => {
-        if (isSending) {
-          setIsSending(false);
+        if (animationState === "glitch" || animationState === "jump") {
+          setAnimationState("visible");
         }
       }}
     >
