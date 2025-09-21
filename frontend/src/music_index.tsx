@@ -12,27 +12,28 @@ import { ToastMessage } from './music_components/ToastMessage';
 import { LiveMusicHelper } from './music_utils/LiveMusicHelper';
 import { AudioAnalyser } from './music_utils/AudioAnalyser';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY, apiVersion: 'v1alpha' });
+const musicAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY, apiVersion: 'v1alpha' });
+const textAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const model = 'lyria-realtime-exp';
 
 export function main() {
-  const initialPrompts = buildInitialPrompts();
+  let prompts = buildInitialPrompts();
 
-  const pdjMidi = new PromptDjMidi(initialPrompts);
+  const pdjMidi = new PromptDjMidi(prompts);
   document.body.appendChild(pdjMidi);
 
   const toastMessage = new ToastMessage();
   document.body.appendChild(toastMessage);
 
-  const liveMusicHelper = new LiveMusicHelper(ai, model);
-  liveMusicHelper.setWeightedPrompts(initialPrompts);
+  const liveMusicHelper = new LiveMusicHelper(musicAI, model);
+  liveMusicHelper.setWeightedPrompts(prompts);
 
   const audioAnalyser = new AudioAnalyser(liveMusicHelper.audioContext);
   liveMusicHelper.extraDestination = audioAnalyser.node;
 
   pdjMidi.addEventListener('prompts-changed', ((e: Event) => {
     const customEvent = e as CustomEvent<Map<string, Prompt>>;
-    const prompts = customEvent.detail;
+    prompts = customEvent.detail;
     liveMusicHelper.setWeightedPrompts(prompts);
   }));
 
@@ -67,9 +68,27 @@ export function main() {
 
   const updateFirstPrompt = async (text: string) => {
     if (text) {
-      const controlParams = await parsePromptWithGemini(ai, text);
-      if (controlParams) {
-        pdjMidi.updateFirstPrompt(controlParams.prompt || text);
+      const promptTexts = DEFAULT_PROMPTS.map(p => p.text);
+      const controlParams = await parsePromptWithGemini(textAI, text, promptTexts);
+      console.log("Received Control Params:", controlParams);
+
+      if (controlParams && controlParams.prompts && Array.isArray(controlParams.prompts)) {
+        // Turn off all prompts first to create a clean slate
+        prompts.forEach(p => p.weight = 0);
+
+        // Set weights for the prompts returned by the agent
+        controlParams.prompts.forEach((agentPrompt: { prompt_name: string, weight: number }) => {
+          const targetPrompt = [...prompts.values()].find(p => p.text === agentPrompt.prompt_name);
+          if (targetPrompt) {
+            targetPrompt.weight = agentPrompt.weight;
+            prompts.set(targetPrompt.promptId, targetPrompt);
+          }
+        });
+
+        // Update the UI and the music model with the new mix
+        const newPrompts = new Map(prompts);
+        pdjMidi.updatePrompts(newPrompts);
+        liveMusicHelper.setWeightedPrompts(newPrompts);
         
         const config: any = {};
         if (controlParams.bpm) config.bpm = controlParams.bpm;
@@ -77,11 +96,9 @@ export function main() {
         if (controlParams.brightness) config.brightness = controlParams.brightness;
 
         if (Object.keys(config).length > 0) {
+          console.log("Updating Music Config:", config);
           liveMusicHelper.updateMusicConfig(config, !!config.bpm);
         }
-      } else {
-        // Fallback to the old behavior if the control agent fails
-        pdjMidi.updateFirstPrompt(text);
       }
     }
   };
@@ -90,10 +107,12 @@ export function main() {
 }
 
 function buildInitialPrompts() {
-  // Pick 3 random prompts to start at weight = 1
-  const startOn = [...DEFAULT_PROMPTS]
-    .sort(() => Math.random() - 0.5)
-    .slice(0, 3);
+  // Start with a predefined, pleasant mix instead of a blank slate.
+  const startOn = [
+    { text: 'Lush Strings', weight: 0.8 },
+    { text: 'Sparkling Arpeggios', weight: 0.4 },
+    { text: 'Chillwave', weight: 0.6 },
+  ];
 
   const prompts = new Map<string, Prompt>();
 
@@ -101,10 +120,13 @@ function buildInitialPrompts() {
     const promptId = `prompt-${i}`;
     const prompt = DEFAULT_PROMPTS[i];
     const { text, color } = prompt;
+
+    const startPrompt = startOn.find(p => p.text === text);
+
     prompts.set(promptId, {
       promptId,
       text,
-      weight: startOn.includes(prompt) ? 1 : 0,
+      weight: startPrompt ? startPrompt.weight : 0,
       cc: i,
       color,
     });

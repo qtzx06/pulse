@@ -14,8 +14,12 @@ export class LiveMusicHelper extends EventTarget {
 
   private session: LiveMusicSession | null = null;
   private sessionPromise: Promise<LiveMusicSession> | null = null;
+  private readyPromise: Promise<void>;
+  private resolveReadyPromise!: () => void;
 
-  private connectionError = true;
+  
+
+  
 
   private filteredPrompts = new Set<string>();
   private nextStartTime = 0;
@@ -36,6 +40,9 @@ export class LiveMusicHelper extends EventTarget {
     this.prompts = new Map();
     this.audioContext = new AudioContext({ sampleRate: 48000 });
     this.outputNode = this.audioContext.createGain();
+    this.readyPromise = new Promise(resolve => {
+      this.resolveReadyPromise = resolve;
+    });
   }
 
   private getSession(): Promise<LiveMusicSession> {
@@ -49,7 +56,7 @@ export class LiveMusicHelper extends EventTarget {
       callbacks: {
         onmessage: async (e: LiveMusicServerMessage) => {
           if (e.setupComplete) {
-            this.connectionError = false;
+            this.resolveReadyPromise(); // Signal that the session is ready
           }
           if (e.filteredPrompt) {
             this.filteredPrompts = new Set([...this.filteredPrompts, e.filteredPrompt.text!])
@@ -60,12 +67,10 @@ export class LiveMusicHelper extends EventTarget {
           }
         },
         onerror: () => {
-          this.connectionError = true;
           this.stop();
           this.dispatchEvent(new CustomEvent('error', { detail: 'Connection error, please restart audio.' }));
         },
         onclose: () => {
-          this.connectionError = true;
           this.stop();
           this.dispatchEvent(new CustomEvent('error', { detail: 'Connection error, please restart audio.' }));
         },
@@ -138,6 +143,7 @@ export class LiveMusicHelper extends EventTarget {
   public async play() {
     this.setPlaybackState('loading');
     this.session = await this.getSession();
+    await this.readyPromise; // Wait for the session to be fully ready
     await this.setWeightedPrompts(this.prompts);
     this.audioContext.resume();
     this.session.play();
@@ -183,7 +189,7 @@ export class LiveMusicHelper extends EventTarget {
     try {
         await this.session.setMusicGenerationConfig({ musicGenerationConfig: config });
         if (resetContext) {
-            await this.session.reset_context();
+            await this.session.resetContext();
         }
     } catch (e: any) {
         this.dispatchEvent(new CustomEvent('error', { detail: e.message }));

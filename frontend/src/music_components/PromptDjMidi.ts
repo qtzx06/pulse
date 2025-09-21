@@ -175,7 +175,7 @@ export class PromptDjMidi extends LitElement {
       const inputIds = await this.midiDispatcher.getMidiAccess();
       this.midiInputIds = inputIds;
       this.activeMidiInputId = this.midiDispatcher.activeMidiInputId;
-    } catch (e) {
+    } catch (e: any) {
       this.showMidi = false;
       this.dispatchEvent(new CustomEvent('error', {detail: e.message}));
     }
@@ -204,6 +204,11 @@ export class PromptDjMidi extends LitElement {
       // Artificially trigger the event dispatch, just like the knob does.
       (firstController as any).dispatchPromptChange();
     }
+  }
+
+  public updatePrompts(newPrompts: Map<string, Prompt>) {
+    this.prompts = newPrompts;
+    this.requestUpdate();
   }
 
   override render() {
