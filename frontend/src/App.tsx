@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, Variants, AnimatePresence } from 'framer-motion';
 import NeuroShaderCanvas from './components/NeuroShaderCanvas';
 import ChatInput from './components/ChatInput';
+import githubLogoWhite from './assets/github-logo-white.svg';
+import githubLogoBlack from './assets/github-logo-black.svg';
 import './App.css';
 
 const title = "PULSE";
@@ -118,6 +120,33 @@ function App() {
 
   return (
     <div className="App">
+      <AnimatePresence>
+        {!isExpanded && (
+          <motion.a
+            href="https://github.com/qtzx06/pulse"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="github-link"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ delay: 2.8, duration: 0.5 }}
+          >
+            <img src={githubLogoBlack} alt="GitHub" style={{ width: '32px', height: '32px' }} />
+          </motion.a>
+        )}
+      </AnimatePresence>
+      <motion.a
+        href="https://github.com/qtzx06/pulse"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="github-link"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isExpanded ? 1 : 0 }}
+        transition={{ delay: 0.5, duration: 0.5 }}
+      >
+        <img src={githubLogoWhite} alt="GitHub" style={{ width: '32px', height: '32px' }} />
+      </motion.a>
       <svg className="clip-svg">
         <defs>
           <clipPath id="wave-clip">
