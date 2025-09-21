@@ -17,6 +17,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   const [recordingTime, setRecordingTime] = useState(0);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [recordedDuration, setRecordedDuration] = useState(0);
+  const [isSending, setIsSending] = useState(false);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -126,6 +127,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
     onSend(inputValue);
     setInputValue('');
     clearRecording();
+    setIsSending(true);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -161,10 +163,21 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
     <motion.div
       className="search-container"
       initial="hidden"
-      animate="visible"
+      animate={isSending ? "jump" : "visible"}
       variants={{
-        visible: { y: 0, opacity: 1, transition: { duration: 0.8, ease: "easeOut" } },
-        hidden: { y: -50, opacity: 0 },
+        visible: { y: 0, opacity: 1, scale: 1, transition: { duration: 0.8, ease: "easeOut" } },
+        hidden: { y: -50, opacity: 0, scale: 0.9 },
+        jump: { 
+          y: [0, -5, 0],
+          scale: [1, 1.02, 1],
+          opacity: 1,
+          transition: { duration: 0.3, ease: "easeInOut" }
+        }
+      }}
+      onAnimationComplete={() => {
+        if (isSending) {
+          setIsSending(false);
+        }
       }}
     >
       <div className={`search-field-wrapper ${isInputFocused ? 'focused' : ''}`}>

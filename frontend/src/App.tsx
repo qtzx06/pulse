@@ -110,8 +110,8 @@ function App() {
       transition: {
         duration: 2.5,
         repeat: Infinity,
-        repeatType: "mirror",
-        ease: "easeInOut",
+        repeatType: "mirror" as const,
+        ease: "easeInOut" as const, // Explicitly cast to the correct type
       }
     },
     active: {
