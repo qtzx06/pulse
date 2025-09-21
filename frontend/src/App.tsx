@@ -3,6 +3,8 @@ import { motion, Variants, AnimatePresence } from 'framer-motion';
 import NeuroShaderCanvas from './components/NeuroShaderCanvas';
 import ChatInput from './components/ChatInput';
 import './App.css';
+import { main as musicMain } from './music_index';
+import { LiveMusicHelper } from './music_utils/LiveMusicHelper';
 
 const title = "PULSE";
 
@@ -75,9 +77,21 @@ function App() {
   const barRef = useRef<HTMLDivElement>(null);
   const animationFrameId = useRef<number>();
   const [isExpanded, setIsExpanded] = useState(false);
+  const musicHelperRef = useRef<LiveMusicHelper | null>(null);
+  const [musicStarted, setMusicStarted] = useState(false);
+
+  useEffect(() => {
+    if (!musicHelperRef.current) {
+      musicHelperRef.current = musicMain();
+    }
+  }, []);
 
   const handleSend = () => {
     setIsExpanded(true);
+    if (musicHelperRef.current && !musicStarted) {
+      musicHelperRef.current.play();
+      setMusicStarted(true);
+    }
   };
 
   useEffect(() => {
