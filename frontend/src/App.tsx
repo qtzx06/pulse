@@ -176,6 +176,7 @@ function App() {
 
       <motion.div
         className="shader-container"
+        style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: -3 }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1, delay: 1 }}

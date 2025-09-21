@@ -29,40 +29,40 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
     currentMount.appendChild(renderer.domElement);
 
     const group = new THREE.Group();
-    groupRef.current = group; // Store group in ref
-    group.scale.set(0.6, 0.6, 0.6); // Set initial larger scale
+    groupRef.current = group;
+    group.scale.set(0.6, 0.6, 0.6);
     scene.add(group);
 
-    const icosahedronGeometry = new THREE.IcosahedronGeometry(10, 10);
-    const lambertMaterial = new THREE.MeshLambertMaterial({
-      color: 0xffffff,
-      wireframe: true,
-    });
-
-    const ball = new THREE.Mesh(icosahedronGeometry, lambertMaterial);
-    ball.position.set(0, 0, 0);
-    group.add(ball);
-
-    const glowMaterial = new THREE.MeshBasicMaterial({
-      color: 0xffffff,
-      transparent: true,
-      opacity: 0.3,
-      side: THREE.BackSide,
-    });
-    const glowBall = new THREE.Mesh(icosahedronGeometry, glowMaterial);
-    glowBall.position.set(0, 0, 0);
-    glowBall.scale.set(1.05, 1.05, 1.05);
-    group.add(glowBall);
+    // Use a more complex TorusKnot geometry for a "cool design"
+    const geometry = new THREE.TorusKnotGeometry(8, 1.2, 256, 20);
     
-    const ambientLight = new THREE.AmbientLight(0xaaaaaa);
-    scene.add(ambientLight);
+    const shaderMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        lightDirection: { value: new THREE.Vector3(1, 1, 1).normalize() },
+      },
+      vertexShader: `
+        varying vec3 vNormal;
+        void main() {
+          vNormal = normalize(normalMatrix * normal);
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vNormal;
+        uniform vec3 lightDirection;
+        void main() {
+          float intensity = dot(vNormal, lightDirection);
+          float gray;
+          if (intensity > 0.8) gray = 0.1;
+          else if (intensity > 0.4) gray = 0.4;
+          else gray = 0.8;
+          gl_FragColor = vec4(gray, gray, gray, 1.0);
+        }
+      `,
+    });
 
-    const spotLight = new THREE.SpotLight(0xffffff);
-    spotLight.intensity = 0.9;
-    spotLight.position.set(-10, 40, 20);
-    spotLight.lookAt(ball);
-    spotLight.castShadow = true;
-    scene.add(spotLight);
+    const mesh = new THREE.Mesh(geometry, shaderMaterial);
+    group.add(mesh);
 
     analyser.fftSize = 512;
     const bufferLength = analyser.frequencyBinCount;
@@ -80,16 +80,23 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
         return outMin + fr * delta;
     };
 
-    const makeRoughBall = (mesh: THREE.Mesh, bassFr: number, treFr: number) => {
+    const distortMesh = (mesh: THREE.Mesh, bassFr: number, treFr: number) => {
         const vertices = mesh.geometry.getAttribute('position');
-        const radius = (mesh.geometry as THREE.IcosahedronGeometry).parameters.radius;
+        const radius = (mesh.geometry as THREE.TorusKnotGeometry).parameters.radius;
         const time = window.performance.now();
-        const rf = 0.00001;
+        
+        const rf1 = 0.00001, rf2 = 0.00008, amp1 = 6, amp2 = 1.5;
 
         for (let i = 0; i < vertices.count; i++) {
             const vertex = new THREE.Vector3().fromBufferAttribute(vertices, i);
             vertex.normalize();
-            const distance = (radius + bassFr) + noise.noise3d(vertex.x + time * rf * 7, vertex.y + time * rf * 8, vertex.z + time * rf * 9) * 7 * treFr;
+            
+            const noiseVal1 = noise.noise3d(vertex.x + time * rf1 * 7, vertex.y + time * rf1 * 8, vertex.z + time * rf1 * 9);
+            const noiseVal2 = noise.noise3d(vertex.x + time * rf2 * 5, vertex.y + time * rf2 * 6, vertex.z + time * rf2 * 7);
+            
+            const distortion = (noiseVal1 * amp1 * treFr) + (noiseVal2 * amp2 * treFr);
+            const distance = radius + bassFr + distortion;
+
             vertex.multiplyScalar(distance);
             vertices.setXYZ(i, vertex.x, vertex.y, vertex.z);
         }
@@ -111,13 +118,11 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
         const lowerMaxFr = lowerMax / lowerHalfArray.length;
         const upperAvgFr = upperAvg / upperHalfArray.length;
 
-        makeRoughBall(ball, modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), modulate(upperAvgFr, 0, 1, 0, 4));
-        makeRoughBall(glowBall, modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), modulate(upperAvgFr, 0, 1, 0, 4));
+        distortMesh(mesh, modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), modulate(upperAvgFr, 0, 1, 0, 4));
         group.rotation.y += 0.005;
       } else {
         const now = performance.now();
         if (now - lastActiveTime > idleTimeout) {
-          // Slower, continuous idle spin
           group.rotation.y += 0.001;
         }
       }
@@ -146,26 +151,25 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
         currentMount.removeChild(renderer.domElement);
       }
       scene.remove(group);
-      icosahedronGeometry.dispose();
-      lambertMaterial.dispose();
-      glowMaterial.dispose();
+      geometry.dispose();
+      shaderMaterial.dispose();
       renderer.dispose();
     };
   }, [analyser]);
 
-  // Effect for the expansion animation, triggered by isFlickerComplete
+  // Effect for the expansion animation
   useEffect(() => {
     if (isFlickerComplete && groupRef.current) {
       const group = groupRef.current;
-      const targetScale = 1.2; // Grow to a larger size
-      const duration = 1200; // ms
+      const targetScale = 1.2;
+      const duration = 1200;
       const startTime = performance.now();
       let animationFrameId: number;
 
       const animate = (currentTime: number) => {
         const elapsedTime = currentTime - startTime;
         const progress = Math.min(elapsedTime / duration, 1);
-        const easeOutProgress = 1 - Math.pow(1 - progress, 4); // easeOutQuart
+        const easeOutProgress = 1 - Math.pow(1 - progress, 4);
 
         const currentScale = 0.6 + (targetScale - 0.6) * easeOutProgress;
         group.scale.set(currentScale, currentScale, currentScale);
