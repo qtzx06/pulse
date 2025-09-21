@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { TypeAnimation } from 'react-type-animation';
 import PulseVisualizer from './PulseVisualizer';
@@ -166,20 +166,20 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   };
 
   const containerVariants = {
-    visible: { y: 0, opacity: 1, scale: 1, transition: { duration: 0.8, ease: "easeOut", delay: 2.5 } },
+    visible: { y: 0, opacity: 1, scale: 1, transition: { duration: 0.8, ease: "easeOut" as const, delay: 2.5 } },
     hidden: { y: -50, opacity: 0, scale: 0.9 },
     jump: { 
       y: [0, -5, 0],
       scale: [1, 1.02, 1],
       opacity: 1,
-      transition: { duration: 0.3, ease: "easeInOut" }
+      transition: { duration: 0.3, ease: "easeInOut" as const }
     },
     glitch: {
-      y: 0, // Explicitly set y to 0 to prevent jumping
+      y: 0,
       x: [0, 2, 0, -2, 0],
       scale: [1, 1.01, 1, 0.99, 1],
-      opacity: [1, 0, 1, 0.6, 1],
-      transition: { duration: 0.5, ease: "easeInOut" }
+      opacity: [1, 0.7, 1, 0.5, 1],
+      transition: { duration: 0.4, ease: "easeInOut" as const }
     }
   };
 
