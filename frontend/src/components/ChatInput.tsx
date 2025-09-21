@@ -33,7 +33,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
       const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
       audioContextRef.current = new AudioContext();
       analyserRef.current = audioContextRef.current.createAnalyser();
-      analyserRef.current.fftSize = 256;
+      analyserRef.current.fftSize = 512;
       mediaStreamSourceRef.current = audioContextRef.current.createMediaStreamSource(stream);
       if (analyserRef.current) {
         mediaStreamSourceRef.current.connect(analyserRef.current);

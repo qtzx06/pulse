@@ -8,8 +8,9 @@ interface PulseVisualizerProps {
 }
 
 const PulseVisualizer: React.FC<PulseVisualizerProps> = ({ fftData, width, height }) => {
-  const barWidth = (width / fftData.length) * 2.5;
-  const numBars = Math.floor(width / (barWidth + 1)); // 1 is the gap
+  const numBars = fftData.length / 2; // Use half the data for a better look
+  const gap = 1;
+  const barWidth = (width - (numBars - 1) * gap) / numBars;
 
   return (
     <svg width={width} height={height} className="pulse-visualizer">
@@ -21,14 +22,14 @@ const PulseVisualizer: React.FC<PulseVisualizerProps> = ({ fftData, width, heigh
         return (
           <motion.rect
             key={index}
-            x={index * (barWidth + 1)}
+            x={index * (barWidth + gap)}
             y={yOffset}
             width={barWidth}
             height={barHeight}
             rx={2}
             initial={{ height: 0, y: height / 2 }}
             animate={{ height: barHeight, y: yOffset }}
-            transition={{ duration: 0.1 }}
+            transition={{ duration: 0.05 }}
             fill="rgba(255, 255, 255, 0.7)"
           />
         );
