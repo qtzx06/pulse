@@ -81,6 +81,7 @@ function App() {
   const musicHelperRef = useRef<LiveMusicHelper | null>(null);
   const updatePromptRef = useRef<((text: string) => Promise<void>) | null>(null);
   const [musicStarted, setMusicStarted] = useState(false);
+  const [isFlickerComplete, setIsFlickerComplete] = useState(false);
 
   useEffect(() => {
     if (!musicHelperRef.current) {
@@ -148,8 +149,9 @@ function App() {
             animate={{ opacity: [0, 0.8, 0.3, 1, 0.6, 1] }}
             transition={{ duration: 0.8, delay: 0.5 }}
             style={{ position: 'absolute', width: '100%', height: '100%', zIndex: -2 }}
+            onAnimationComplete={() => setIsFlickerComplete(true)}
           >
-            <ThreeJSAudioVisualizer analyser={musicHelperRef.current.analyser} />
+            <ThreeJSAudioVisualizer analyser={musicHelperRef.current.analyser} isFlickerComplete={isFlickerComplete} />
           </motion.div>
         )}
       </AnimatePresence>

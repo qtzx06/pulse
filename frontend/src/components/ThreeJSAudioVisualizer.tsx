@@ -4,11 +4,14 @@ import { SimplexNoise } from 'three/examples/jsm/Addons.js';
 
 interface ThreeJSAudioVisualizerProps {
   analyser: AnalyserNode;
+  isFlickerComplete: boolean;
 }
 
-const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyser }) => {
+const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyser, isFlickerComplete }) => {
   const mountRef = useRef<HTMLDivElement>(null);
+  const groupRef = useRef<THREE.Group | null>(null);
 
+  // Effect for Three.js setup and the main render loop
   useEffect(() => {
     if (!mountRef.current || !analyser) {
       return;
@@ -26,6 +29,8 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
     currentMount.appendChild(renderer.domElement);
 
     const group = new THREE.Group();
+    groupRef.current = group; // Store group in ref
+    group.scale.set(0.6, 0.6, 0.6); // Set initial larger scale
     scene.add(group);
 
     const icosahedronGeometry = new THREE.IcosahedronGeometry(10, 10);
@@ -65,6 +70,10 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
     const noise = new SimplexNoise();
     let animationFrameId: number;
 
+    let lastActiveTime = performance.now();
+    const idleTimeout = 1500;
+    const silenceThreshold = 2;
+
     const modulate = (val: number, minVal: number, maxVal: number, outMin: number, outMax: number) => {
         const fr = (val - minVal) / (maxVal - minVal);
         const delta = outMax - outMin;
@@ -90,20 +99,29 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
 
     const render = () => {
       analyser.getByteFrequencyData(dataArray);
+      const averageFrequency = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
+      const isActive = averageFrequency > silenceThreshold;
 
-      const lowerHalfArray = dataArray.slice(0, dataArray.length / 2 - 1);
-      const upperHalfArray = dataArray.slice(dataArray.length / 2 - 1, dataArray.length - 1);
+      if (isActive) {
+        lastActiveTime = performance.now();
+        const lowerHalfArray = dataArray.slice(0, dataArray.length / 2 - 1);
+        const upperHalfArray = dataArray.slice(dataArray.length / 2 - 1, dataArray.length - 1);
+        const lowerMax = Math.max(...lowerHalfArray);
+        const upperAvg = upperHalfArray.reduce((sum, a) => sum + a, 0) / upperHalfArray.length;
+        const lowerMaxFr = lowerMax / lowerHalfArray.length;
+        const upperAvgFr = upperAvg / upperHalfArray.length;
 
-      const lowerMax = Math.max(...lowerHalfArray);
-      const upperAvg = upperHalfArray.reduce((sum, a) => sum + a, 0) / upperHalfArray.length;
+        makeRoughBall(ball, modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), modulate(upperAvgFr, 0, 1, 0, 4));
+        makeRoughBall(glowBall, modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), modulate(upperAvgFr, 0, 1, 0, 4));
+        group.rotation.y += 0.005;
+      } else {
+        const now = performance.now();
+        if (now - lastActiveTime > idleTimeout) {
+          // Slower, continuous idle spin
+          group.rotation.y += 0.001;
+        }
+      }
 
-      const lowerMaxFr = lowerMax / lowerHalfArray.length;
-      const upperAvgFr = upperAvg / upperHalfArray.length;
-
-      makeRoughBall(ball, modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), modulate(upperAvgFr, 0, 1, 0, 4));
-      makeRoughBall(glowBall, modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), modulate(upperAvgFr, 0, 1, 0, 4));
-
-      group.rotation.y += 0.005;
       renderer.render(scene, camera);
       animationFrameId = requestAnimationFrame(render);
     };
@@ -134,6 +152,36 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
       renderer.dispose();
     };
   }, [analyser]);
+
+  // Effect for the expansion animation, triggered by isFlickerComplete
+  useEffect(() => {
+    if (isFlickerComplete && groupRef.current) {
+      const group = groupRef.current;
+      const targetScale = 1.2; // Grow to a larger size
+      const duration = 1200; // ms
+      const startTime = performance.now();
+      let animationFrameId: number;
+
+      const animate = (currentTime: number) => {
+        const elapsedTime = currentTime - startTime;
+        const progress = Math.min(elapsedTime / duration, 1);
+        const easeOutProgress = 1 - Math.pow(1 - progress, 4); // easeOutQuart
+
+        const currentScale = 0.6 + (targetScale - 0.6) * easeOutProgress;
+        group.scale.set(currentScale, currentScale, currentScale);
+
+        if (progress < 1) {
+          animationFrameId = requestAnimationFrame(animate);
+        }
+      };
+
+      animationFrameId = requestAnimationFrame(animate);
+
+      return () => {
+        cancelAnimationFrame(animationFrameId);
+      };
+    }
+  }, [isFlickerComplete]);
 
   return <div ref={mountRef} style={{ width: '100%', height: '100%', position: 'absolute', zIndex: -1 }} />;
 };
