@@ -26,6 +26,7 @@ export class LiveMusicHelper extends EventTarget {
   private bufferTime = 2;
 
   public readonly audioContext: AudioContext;
+  public readonly analyser: AnalyserNode;
   public extraDestination: AudioNode | null = null;
 
   private outputNode: GainNode;
@@ -40,6 +41,8 @@ export class LiveMusicHelper extends EventTarget {
     this.prompts = new Map();
     this.audioContext = new AudioContext({ sampleRate: 48000 });
     this.outputNode = this.audioContext.createGain();
+    this.analyser = this.audioContext.createAnalyser();
+    this.outputNode.connect(this.analyser);
     this.readyPromise = new Promise(resolve => {
       this.resolveReadyPromise = resolve;
     });

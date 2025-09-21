@@ -10,17 +10,22 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@google/genai": "^1.0.0",
     "framer-motion": "^12.23.16",
+    "lit": "^3.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-type-animation": "^3.2.0",
     "react-voice-visualizer": "^2.0.8",
-    "@google/genai": "^1.0.0",
-    "lit": "^3.3.0"
+    "three": "^0.180.0"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.18.6",
+    "@babel/plugin-proposal-decorators": "^7.24.1",
+    "@types/node": "^20.12.12",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
+    "@types/three": "^0.180.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react": "^4.0.3",
@@ -31,9 +36,6 @@
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.0.2",
-    "vite": "^4.4.5",
-    "@babel/plugin-proposal-class-properties": "^7.18.6",
-    "@babel/plugin-proposal-decorators": "^7.24.1",
-    "@types/node": "^20.12.12"
+    "vite": "^4.4.5"
   }
 }

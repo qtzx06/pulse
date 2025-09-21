@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, Variants, AnimatePresence } from 'framer-motion';
 import NeuroShaderCanvas from './components/NeuroShaderCanvas';
 import ChatInput from './components/ChatInput';
+import ThreeJSAudioVisualizer from './components/ThreeJSAudioVisualizer'; // Import the new component
 import './App.css';
 import { main as musicMain } from './music_index';
 import { LiveMusicHelper } from './music_utils/LiveMusicHelper';
@@ -140,6 +141,18 @@ function App() {
 
   return (
     <div className="App">
+       <AnimatePresence>
+        {musicStarted && musicHelperRef.current && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 0.8, 0.3, 1, 0.6, 1] }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            style={{ position: 'absolute', width: '100%', height: '100%', zIndex: -2 }}
+          >
+            <ThreeJSAudioVisualizer analyser={musicHelperRef.current.analyser} />
+          </motion.div>
+        )}
+      </AnimatePresence>
       <svg className="clip-svg">
         <defs>
           <clipPath id="wave-clip">
