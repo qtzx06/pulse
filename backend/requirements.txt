@@ -1,9 +1,7 @@
-replicate
-pydub
-langchain
-langchain-google-genai
-python-dotenv
+fastapi
+uvicorn
+websockets
 requests
-Flask
-Flask-Cors
-protobuf==3.20.3
+python-dotenv
+Pillow
+google-generativeai # The official Google Generative AI SDK
