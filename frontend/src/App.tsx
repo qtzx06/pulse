@@ -77,6 +77,11 @@ function App() {
   const pathRef = useRef<SVGPathElement>(null);
   const barRef = useRef<HTMLDivElement>(null);
   const animationFrameId = useRef<number>();
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleSend = () => {
+    setIsExpanded(true);
+  };
 
   useEffect(() => {
     setupMicrophone();
@@ -161,13 +166,15 @@ function App() {
       <motion.div
         ref={barRef}
         className="inverter-bar"
-        initial={{ y: '-100vh' }}
-        animate={{ y: '0px' }} // Animate to -50px to create headroom
+        initial={{ y: '100vh' }}
+        animate={{
+          y: isExpanded ? '-50px' : 'calc(50vh - 50px)'
+        }}
         transition={{
           type: 'tween',
           ease: [0.4, 0, 0.2, 1],
           duration: 1.4,
-          delay: 1.5,
+          delay: isExpanded ? 0 : 1.5,
         }}
       />
 
@@ -203,7 +210,7 @@ function App() {
           animate={{ opacity: 1 }}
           transition={{ delay: 2.5 }}
         >
-          <ChatInput />
+          <ChatInput onSend={handleSend} />
         </motion.div>
       </div>
     </div>

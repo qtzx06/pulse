@@ -1,15 +1,30 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { TypeAnimation } from 'react-type-animation';
-import './Original.css'; // Using a new CSS file to avoid conflicts
+import { useMicrophone, MicrophoneState } from '../context/MicrophoneContextProvider';
+import './Original.css';
 
 interface ChatInputProps {
-  onToggleHumming: () => void;
+  onSend: () => void;
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({ onToggleHumming }) => {
+const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   const [inputValue, setInputValue] = useState('');
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const { startMicrophone, stopMicrophone, microphoneState } = useMicrophone();
+  const [isHumming, setIsHumming] = useState(false);
+
+  const toggleHumming = () => {
+    if (isHumming) {
+      stopMicrophone();
+      setIsHumming(false);
+    } else {
+      if (microphoneState === MicrophoneState.Ready) {
+        startMicrophone();
+        setIsHumming(true);
+      }
+    }
+  };
 
   return (
     <motion.div
@@ -22,7 +37,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onToggleHumming }) => {
       }}
     >
       <div className={`search-field-wrapper ${isInputFocused ? 'focused' : ''}`}>
-        <button onClick={onToggleHumming} className="chat-button mic-button">
+        <button onClick={toggleHumming} className="chat-button mic-button">
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" fill="currentColor"/>
             <path d="M19 10v2a7 7 0 0 1-14 0v-2H3v2a9 9 0 0 0 8 8.94V24h2v-3.06A9 9 0 0 0 21 12v-2h-2z" fill="currentColor"/>
@@ -53,7 +68,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onToggleHumming }) => {
           )}
         </div>
 
-        <button className="chat-button send-button">
+        <button onClick={onSend} className="chat-button send-button">
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor"/>
           </svg>
