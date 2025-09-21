@@ -20,7 +20,7 @@
   position: absolute;
   bottom: 0;
   left: 0;
-  height: calc(50vh + 50px); /* 50px headroom for the wave */
+  height: calc(100vh + 150px); /* Set to max height */
   width: 100%;
   background-color: white;
   mix-blend-mode: difference;

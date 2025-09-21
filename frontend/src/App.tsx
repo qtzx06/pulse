@@ -166,10 +166,9 @@ function App() {
       <motion.div
         ref={barRef}
         className="inverter-bar"
-        initial={{ y: '100vh' }}
+        initial={{ y: 'calc(100vh + 150px)' }}
         animate={{
-          y: '0px',
-          height: isExpanded ? 'calc(100vh + 150px)' : 'calc(50vh + 50px)'
+          y: isExpanded ? '0px' : 'calc(50vh + 100px)'
         }}
         transition={{
           type: 'tween',
