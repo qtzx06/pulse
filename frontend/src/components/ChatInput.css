@@ -21,4 +21,6 @@
   z-index: 2;
 }
 
-
+.search-input.recording {
+  color: transparent;
+}

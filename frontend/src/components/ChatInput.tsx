@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { TypeAnimation } from 'react-type-animation';
 import PulseVisualizer from './PulseVisualizer';
@@ -16,6 +16,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   const [fftData, setFftData] = useState(new Uint8Array(0));
   const [recordingTime, setRecordingTime] = useState(0);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
+  const [recordedDuration, setRecordedDuration] = useState(0);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -23,17 +24,20 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   const animationFrameRef = useRef<number | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const recordingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const setupMicrophone = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
-      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      audioContextRef.current = new AudioContext();
       analyserRef.current = audioContextRef.current.createAnalyser();
       analyserRef.current.fftSize = 256;
       mediaStreamSourceRef.current = audioContextRef.current.createMediaStreamSource(stream);
-      mediaStreamSourceRef.current.connect(analyserRef.current);
+      if (analyserRef.current) {
+        mediaStreamSourceRef.current.connect(analyserRef.current);
+      }
       
       const bufferLength = analyserRef.current.frequencyBinCount;
       const dataArray = new Uint8Array(bufferLength);
@@ -91,6 +95,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
     if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
       audioContextRef.current.close();
     }
+    setRecordedDuration(recordingTime);
     setIsRecording(false);
     setRecordingTime(0);
     setFftData(new Uint8Array(0));
@@ -98,6 +103,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
 
   const clearRecording = () => {
     setRecordedBlob(null);
+    setRecordedDuration(0);
   };
 
   const handleLeftButtonClick = () => {
@@ -114,6 +120,18 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
     const minutes = Math.floor(time / 60).toString().padStart(2, '0');
     const seconds = (time % 60).toString().padStart(2, '0');
     return `${minutes}:${seconds}`;
+  };
+
+  const handleSend = () => {
+    onSend();
+    setInputValue('');
+    clearRecording();
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleSend();
+    }
   };
 
   const getLeftButtonIcon = () => {
@@ -162,23 +180,31 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
           )}
           <input 
             type="text" 
-            className="search-input" 
+            className={`search-input ${isRecording ? 'recording' : ''}`} 
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onFocus={() => setIsInputFocused(true)}
             onBlur={() => setIsInputFocused(false)}
+            onKeyDown={handleKeyDown}
+            disabled={isRecording}
           />
           {inputValue === '' && !isRecording && (
             <div className="placeholder-animation">
-              <span>i'm feeling...&nbsp;</span>
-              <TypeAnimation
-                sequence={[
-                  'edm', 2000, 'rock', 2000, 'pop', 2000, 'hip hop', 2000, 'jazz', 2000,
-                ]}
-                wrapper="span"
-                speed={50}
-                repeat={Infinity}
-              />
+              {recordedBlob ? (
+                <span>hum attached! ({formatTime(recordedDuration)})</span>
+              ) : (
+                <>
+                  <span>i'm feeling...&nbsp;</span>
+                  <TypeAnimation
+                    sequence={[
+                      'edm', 2000, 'rock', 2000, 'pop', 2000, 'hip hop', 2000, 'jazz', 2000,
+                    ]}
+                    wrapper="span"
+                    speed={50}
+                    repeat={Infinity}
+                  />
+                </>
+              )}
             </div>
           )}
         </div>
@@ -188,7 +214,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
             {formatTime(recordingTime)}
           </div>
         ) : (
-          <button onClick={onSend} className="chat-button send-button">
+          <button onClick={handleSend} className="chat-button send-button">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor"/>
             </svg>
