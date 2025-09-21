@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion, Variants } from 'framer-motion';
+import { motion, Variants, AnimatePresence } from 'framer-motion';
 import NeuroShaderCanvas from './components/NeuroShaderCanvas';
 import ChatInput from './components/ChatInput';
 import { useMicrophone } from './context/MicrophoneContextProvider';
@@ -168,31 +168,41 @@ function App() {
       />
 
       <div className="title-and-button-container">
-        <motion.div
-          className="center-title"
-          variants={titleContainerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {title.split('').map((char, index) => (
-            <motion.span
-              key={index}
-              custom={index}
-              variants={letterVariants}
-              style={{ display: 'inline-block' }}
+        <AnimatePresence>
+          {!isExpanded && (
+            <motion.div
+              key="title-group"
+              exit={{ opacity: 1 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
             >
-              {char}
-            </motion.span>
-          ))}
-        </motion.div>
-        <motion.p
-          className="subtitle"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2.8 }}
-        >
-          hum a tune.
-        </motion.p>
+              <motion.div
+                className="center-title"
+                variants={titleContainerVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                {title.split('').map((char, index) => (
+                  <motion.span
+                    key={index}
+                    custom={index}
+                    variants={letterVariants}
+                    style={{ display: 'inline-block' }}
+                  >
+                    {char}
+                  </motion.span>
+                ))}
+              </motion.div>
+              <motion.p
+                className="subtitle"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 2.8 }}
+              >
+                hum a tune.
+              </motion.p>
+            </motion.div>
+          )}
+        </AnimatePresence>
         <motion.div
           className="center-button"
           initial={{ opacity: 0 }}
