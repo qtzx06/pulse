@@ -1,15 +1,16 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { SimplexNoise } from 'three/examples/jsm/Addons.js';
 
 interface ThreeJSAudioVisualizerProps {
   analyser: AnalyserNode;
-  isFlickerComplete: boolean;
+  onSoundActiveChange: (isActive: boolean) => void;
 }
 
-const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyser, isFlickerComplete }) => {
+const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyser, onSoundActiveChange }) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const groupRef = useRef<THREE.Group | null>(null);
+  const [hasStarted, setHasStarted] = useState(false);
 
   // Effect for Three.js setup and the main render loop
   useEffect(() => {
@@ -30,7 +31,7 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
 
     const group = new THREE.Group();
     groupRef.current = group;
-    group.scale.set(0.4, 0.4, 0.4); // Smaller initial scale
+    group.scale.set(0.4, 0.4, 0.4);
     scene.add(group);
 
     const geometry = new THREE.TorusKnotGeometry(8, 1.2, 256, 20);
@@ -64,7 +65,7 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
         }
       `,
       transparent: true,
-      depthWrite: false, // Prevents z-fighting on self-intersecting geometry
+      depthWrite: false,
     });
 
     const mesh = new THREE.Mesh(geometry, shaderMaterial);
@@ -76,9 +77,7 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
     const noise = new SimplexNoise();
     let animationFrameId: number;
 
-    let lastActiveTime = performance.now();
-    const idleTimeout = 1500;
-    const silenceThreshold = 2;
+    let wasActive = false;
 
     const modulate = (val: number, minVal: number, maxVal: number, outMin: number, outMax: number) => {
         const fr = (val - minVal) / (maxVal - minVal);
@@ -113,10 +112,14 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
     const render = () => {
       analyser.getByteFrequencyData(dataArray);
       const averageFrequency = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
-      const isActive = averageFrequency > silenceThreshold;
+      const isActive = averageFrequency > 2;
+
+      if (isActive !== wasActive) {
+        onSoundActiveChange(isActive);
+        wasActive = isActive;
+      }
 
       if (isActive) {
-        lastActiveTime = performance.now();
         const lowerHalfArray = dataArray.slice(0, dataArray.length / 2 - 1);
         const upperHalfArray = dataArray.slice(dataArray.length / 2 - 1, dataArray.length - 1);
         const lowerMax = Math.max(...lowerHalfArray);
@@ -127,10 +130,7 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
         distortMesh(mesh, modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), modulate(upperAvgFr, 0, 1, 0, 4));
         group.rotation.y += 0.005;
       } else {
-        const now = performance.now();
-        if (now - lastActiveTime > idleTimeout) {
-          group.rotation.y += 0.001;
-        }
+        // Idle state is now handled by Framer Motion in App.tsx
       }
 
       renderer.render(scene, camera);
@@ -161,18 +161,28 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
       shaderMaterial.dispose();
       renderer.dispose();
     };
-  }, [analyser]);
+  }, [analyser, onSoundActiveChange]);
 
-  // Effect for the expansion animation
+  // Effect for the expansion and initial rotation animation
   useEffect(() => {
-    if (isFlickerComplete && groupRef.current) {
+    if (groupRef.current && !hasStarted) {
+      setHasStarted(true);
       const group = groupRef.current;
-      const targetScale = 0.8; // Smaller target scale
+      const targetScale = 0.8;
       const duration = 1200;
-      const startTime = performance.now();
+      const delay = 500;
+      const startTime = performance.now() + delay;
       let animationFrameId: number;
 
+      const initialRotationZ = Math.PI * 2;
+      group.rotation.z = initialRotationZ;
+
       const animate = (currentTime: number) => {
+        if (currentTime < startTime) {
+          animationFrameId = requestAnimationFrame(animate);
+          return;
+        }
+        
         const elapsedTime = currentTime - startTime;
         const progress = Math.min(elapsedTime / duration, 1);
         const easeOutProgress = 1 - Math.pow(1 - progress, 4);
@@ -180,8 +190,13 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
         const currentScale = 0.4 + (targetScale - 0.4) * easeOutProgress;
         group.scale.set(currentScale, currentScale, currentScale);
 
+        const currentRotationZ = initialRotationZ * (1 - easeOutProgress);
+        group.rotation.z = currentRotationZ;
+
         if (progress < 1) {
           animationFrameId = requestAnimationFrame(animate);
+        } else {
+          group.rotation.z = 0;
         }
       };
 
@@ -191,7 +206,7 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
         cancelAnimationFrame(animationFrameId);
       };
     }
-  }, [isFlickerComplete]);
+  }, [hasStarted]);
 
   return <div ref={mountRef} style={{ width: '100%', height: '100%', position: 'absolute', zIndex: -1 }} />;
 };

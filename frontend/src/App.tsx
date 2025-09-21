@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, Variants, AnimatePresence } from 'framer-motion';
 import NeuroShaderCanvas from './components/NeuroShaderCanvas';
 import ChatInput from './components/ChatInput';
-import ThreeJSAudioVisualizer from './components/ThreeJSAudioVisualizer'; // Import the new component
+import ThreeJSAudioVisualizer from './components/ThreeJSAudioVisualizer';
 import './App.css';
 import { main as musicMain } from './music_index';
 import { LiveMusicHelper } from './music_utils/LiveMusicHelper';
@@ -60,15 +60,15 @@ const titleContainerVariants: Variants = {
 
 const letterVariants: Variants = {
   hidden: (i: number) => {
-    if (i < 2) return { x: -100, opacity: 0 }; // P, U from left
-    if (i > 2) return { x: 100, opacity: 0 };  // S, E from right
-    return { y: -100, opacity: 0 };           // L from top
+    if (i < 2) return { x: -100, opacity: 0 };
+    if (i > 2) return { x: 100, opacity: 0 };
+    return { y: -100, opacity: 0 };
   },
   visible: {
     x: 0,
     y: 0,
     opacity: 1,
-    transition: { type: 'spring', stiffness: 50, damping: 15 }, // Slower and smoother spring
+    transition: { type: 'spring', stiffness: 50, damping: 15 },
   },
 };
 
@@ -81,7 +81,7 @@ function App() {
   const musicHelperRef = useRef<LiveMusicHelper | null>(null);
   const updatePromptRef = useRef<((text: string) => Promise<void>) | null>(null);
   const [musicStarted, setMusicStarted] = useState(false);
-  const [isFlickerComplete, setIsFlickerComplete] = useState(false);
+  const [isSoundActive, setIsSoundActive] = useState(false);
 
   useEffect(() => {
     if (!musicHelperRef.current) {
@@ -93,11 +93,9 @@ function App() {
 
   const handleSend = (text: string) => {
     setIsExpanded(true);
-
     if (updatePromptRef.current) {
       updatePromptRef.current(text);
     }
-
     if (!musicStarted && musicHelperRef.current) {
       musicHelperRef.current.play();
       setMusicStarted(true);
@@ -107,10 +105,8 @@ function App() {
   useEffect(() => {
     const animateWave = (timestamp: number) => {
       if (!pathRef.current || !barRef.current) return;
-
       const barRect = barRef.current.getBoundingClientRect();
       const headroom = 50;
-
       const points = [];
       const segments = 50;
       for (let i = 0; i <= segments; i++) {
@@ -118,19 +114,14 @@ function App() {
         const sineWave = Math.sin(x * 0.01 + timestamp * 0.002) * 10;
         points.push([x, headroom + sineWave]);
       }
-
       const smoothPath = svgPath(points);
-
       const pathData =
         smoothPath +
         ` L ${barRect.width} ${barRect.height} L 0 ${barRect.height} Z`;
-
       pathRef.current.setAttribute('d', pathData);
       animationFrameId.current = requestAnimationFrame(animateWave);
     };
-
     animationFrameId.current = requestAnimationFrame(animateWave);
-
     return () => {
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
@@ -138,20 +129,29 @@ function App() {
     };
   }, []);
 
-  
-
   return (
     <div className="App">
        <AnimatePresence>
         {musicStarted && musicHelperRef.current && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 0.8, 0.3, 1, 0.6, 1] }}
-            transition={{ duration: 0.8, delay: 0.5 }}
+            initial={{ opacity: 0, rotate: 0 }}
+            animate={{ 
+              opacity: isSoundActive ? 1 : [0, 0.3, 1, 0.1, 0.9, 0.5, 1],
+              rotate: isSoundActive ? 0 : 360,
+            }}
+            transition={{ 
+              duration: 2.0, // Slow down the animation for a smoother feel
+              delay: 0.5,
+              repeat: isSoundActive ? 0 : Infinity,
+              repeatType: "mirror",
+              ease: "easeInOut",
+            }}
             style={{ position: 'absolute', width: '100%', height: '100%', zIndex: -2 }}
-            onAnimationComplete={() => setIsFlickerComplete(true)}
           >
-            <ThreeJSAudioVisualizer analyser={musicHelperRef.current.analyser} isFlickerComplete={isFlickerComplete} />
+            <ThreeJSAudioVisualizer 
+              analyser={musicHelperRef.current.analyser} 
+              onSoundActiveChange={setIsSoundActive} 
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -162,7 +162,6 @@ function App() {
           </clipPath>
         </defs>
       </svg>
-
       <motion.div
         className="white-overlay"
         initial={{ opacity: 1 }}
@@ -173,7 +172,6 @@ function App() {
           if (el) (el as HTMLElement).style.display = 'none';
         }}
       />
-
       <motion.div
         className="shader-container"
         style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: -3 }}
@@ -183,7 +181,6 @@ function App() {
       >
         <NeuroShaderCanvas />
       </motion.div>
-
       <motion.div
         ref={barRef}
         className="inverter-bar"
@@ -198,7 +195,6 @@ function App() {
           delay: isExpanded ? 0 : 1.5,
         }}
       />
-
       <div className="title-and-button-container">
         <AnimatePresence>
           {!isExpanded && (
