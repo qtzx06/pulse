@@ -289,7 +289,7 @@ function App() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 2.8 }}
               >
-                bigred//hacks 2025 winner.
+                bigred//hacks winner.
               </motion.p>
             </motion.div>
           )}
