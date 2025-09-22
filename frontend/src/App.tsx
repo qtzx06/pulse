@@ -109,7 +109,7 @@ function App() {
         opacity: { duration: 0.8, delay: 0.2 },
         rotate: { 
           duration: 2.5, 
-          ease: "easeInOut", 
+          ease: "easeInOut" as const, 
           delay: 0.2,
           repeat: Infinity,
           repeatType: "mirror" as const,
@@ -289,7 +289,7 @@ function App() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 2.8 }}
               >
-                hum a tune.
+                bigred//hacks 2025 winner.
               </motion.p>
             </motion.div>
           )}

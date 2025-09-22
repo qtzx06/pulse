@@ -169,8 +169,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
     visible: { 
       y: 0,
       transition: {
-        type: 'tween',
-        ease: [0.4, 0, 0.2, 1],
+        ease: [0.4, 0, 0.2, 1] as const,
         duration: 1.8,
         delay: 1.5 
       }
