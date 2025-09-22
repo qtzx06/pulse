@@ -166,12 +166,19 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   };
 
   const containerVariants = {
-    visible: { y: 0, opacity: 1, scale: 1, transition: { duration: 0.8, ease: "easeOut" as const, delay: 2.5 } },
-    hidden: { y: -50, opacity: 0, scale: 0.9 },
+    visible: { 
+      y: 0,
+      transition: {
+        type: 'tween',
+        ease: [0.4, 0, 0.2, 1],
+        duration: 1.8,
+        delay: 1.5 
+      }
+    },
+    hidden: { y: '100vh' },
     jump: { 
       y: [0, -5, 0],
       scale: [1, 1.02, 1],
-      opacity: 1,
       transition: { duration: 0.3, ease: "easeInOut" as const }
     },
     glitch: {
