@@ -7,6 +7,8 @@ import './App.css';
 import { main as musicMain } from './music_index';
 import { LiveMusicHelper } from './music_utils/LiveMusicHelper';
 
+import { createNoise2D } from 'simplex-noise';
+
 const title = "PULSE.";
 
 // --- SVG Path Smoothing Helpers ---
@@ -102,7 +104,17 @@ function App() {
     hidden: { opacity: 0 },
     glitchIn: {
       opacity: [0, 0.8, 0.2, 1, 0.5, 1],
-      transition: { duration: 0.2 }
+      rotate: 360,
+      transition: {
+        opacity: { duration: 0.8, delay: 0.2 },
+        rotate: { 
+          duration: 2.5, 
+          ease: "easeInOut", 
+          delay: 0.2,
+          repeat: Infinity,
+          repeatType: "mirror" as const,
+        }
+      }
     },
     idle: {
       opacity: [1, 0.4, 0.9, 0.6, 1],
@@ -140,6 +152,17 @@ function App() {
     }
   };
 
+  const noise2D = createNoise2D();
+  const mousePos = useRef({ y: window.innerHeight / 2 });
+
+  useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
+      mousePos.current.y = event.clientY;
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   useEffect(() => {
     const animateWave = (timestamp: number) => {
       if (!pathRef.current || !barRef.current) return;
@@ -147,10 +170,16 @@ function App() {
       const headroom = 50;
       const points = [];
       const segments = 50;
+      
+      const invertedMouseY = 1 - (mousePos.current.y / window.innerHeight);
+      const timeFactor = 0.5 + invertedMouseY * 0.5;
+      const time = timestamp * 0.0002 * timeFactor;
+
       for (let i = 0; i <= segments; i++) {
         const x = (barRect.width / segments) * i;
-        const sineWave = Math.sin(x * 0.01 + timestamp * 0.002) * 10;
-        points.push([x, headroom + sineWave]);
+        const noiseVal = noise2D(x * 0.002, time);
+        const y = headroom + noiseVal * 20;
+        points.push([x, y]);
       }
       const smoothPath = svgPath(points);
       const pathData =
