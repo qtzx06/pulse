@@ -7,8 +7,6 @@
 import { parsePromptWithGemini } from './controlAgent';
 import type { PlaybackState, Prompt } from './music_types';
 import { GoogleGenAI, LiveMusicFilteredPrompt } from '@google/genai';
-import { PromptDjMidi } from './music_components/PromptDjMidi';
-import { ToastMessage } from './music_components/ToastMessage';
 import { LiveMusicHelper } from './music_utils/LiveMusicHelper';
 import { AudioAnalyser } from './music_utils/AudioAnalyser';
 
@@ -19,11 +17,11 @@ const model = 'lyria-realtime-exp';
 export function main() {
   let prompts = buildInitialPrompts();
 
-  const pdjMidi = new PromptDjMidi(prompts);
-  document.body.appendChild(pdjMidi);
+  // const pdjMidi = new PromptDjMidi(prompts);
+  // document.body.appendChild(pdjMidi);
 
-  const toastMessage = new ToastMessage();
-  document.body.appendChild(toastMessage);
+  // const toastMessage = new ToastMessage();
+  // document.body.appendChild(toastMessage);
 
   const liveMusicHelper = new LiveMusicHelper(musicAI, model);
   liveMusicHelper.setWeightedPrompts(prompts);
@@ -31,40 +29,42 @@ export function main() {
   const audioAnalyser = new AudioAnalyser(liveMusicHelper.audioContext);
   liveMusicHelper.extraDestination = audioAnalyser.node;
 
-  pdjMidi.addEventListener('prompts-changed', ((e: Event) => {
-    const customEvent = e as CustomEvent<Map<string, Prompt>>;
-    prompts = customEvent.detail;
-    liveMusicHelper.setWeightedPrompts(prompts);
-  }));
+  // pdjMidi.addEventListener('prompts-changed', ((e: Event) => {
+  //   const customEvent = e as CustomEvent<Map<string, Prompt>>;
+  //   prompts = customEvent.detail;
+  //   liveMusicHelper.setWeightedPrompts(prompts);
+  // }));
 
   liveMusicHelper.addEventListener('playback-state-changed', ((e: Event) => {
     const customEvent = e as CustomEvent<PlaybackState>;
     const playbackState = customEvent.detail;
-    pdjMidi.playbackState = playbackState;
+    // pdjMidi.playbackState = playbackState;
     playbackState === 'playing' ? audioAnalyser.start() : audioAnalyser.stop();
   }));
 
   liveMusicHelper.addEventListener('filtered-prompt', ((e: Event) => {
     const customEvent = e as CustomEvent<LiveMusicFilteredPrompt>;
     const filteredPrompt = customEvent.detail;
-    toastMessage.show(filteredPrompt.filteredReason!)
-    pdjMidi.addFilteredPrompt(filteredPrompt.text!);
+    // toastMessage.show(filteredPrompt.filteredReason!)
+    // pdjMidi.addFilteredPrompt(filteredPrompt.text!);
+    console.log(`Filtered prompt: ${filteredPrompt.text}, Reason: ${filteredPrompt.filteredReason}`);
   }));
 
   const errorToast = ((e: Event) => {
     const customEvent = e as CustomEvent<string>;
     const error = customEvent.detail;
-    toastMessage.show(error);
+    // toastMessage.show(error);
+    console.error(error);
   });
 
   liveMusicHelper.addEventListener('error', errorToast);
-  pdjMidi.addEventListener('error', errorToast);
+  // pdjMidi.addEventListener('error', errorToast);
 
-  audioAnalyser.addEventListener('audio-level-changed', ((e: Event) => {
-    const customEvent = e as CustomEvent<number>;
-    const level = customEvent.detail;
-    pdjMidi.audioLevel = level;
-  }));
+  // audioAnalyser.addEventListener('audio-level-changed', ((e: Event) => {
+  //   const customEvent = e as CustomEvent<number>;
+  //   const level = customEvent.detail;
+  //   pdjMidi.audioLevel = level;
+  // }));
 
   const updateFirstPrompt = async (text: string) => {
     if (text) {
@@ -87,7 +87,7 @@ export function main() {
 
         // Update the UI and the music model with the new mix
         const newPrompts = new Map(prompts);
-        pdjMidi.updatePrompts(newPrompts);
+        // pdjMidi.updatePrompts(newPrompts);
         liveMusicHelper.setWeightedPrompts(newPrompts);
         
         const config: any = {};
@@ -153,5 +153,3 @@ const DEFAULT_PROMPTS = [
   { color: '#5200ff', text: 'Trip Hop' },
   { color: '#d9b2ff', text: 'Thrash' },
 ];
-
-

@@ -130,7 +130,11 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
         distortMesh(mesh, modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), modulate(upperAvgFr, 0, 1, 0, 4));
         group.rotation.y += 0.005;
       } else {
-        // Idle state is now handled by Framer Motion in App.tsx
+        const time = window.performance.now() * 0.0005;
+        const bassFr = Math.sin(time) * 0.5 + 0.5; // Oscillates between 0 and 1
+        const treFr = Math.cos(time * 0.5) * 0.25 + 0.25; // Oscillates between 0 and 0.5
+        distortMesh(mesh, modulate(bassFr, 0, 1, 0, 2), modulate(treFr, 0, 1, 0, 1));
+        group.rotation.y += 0.001;
       }
 
       renderer.render(scene, camera);
