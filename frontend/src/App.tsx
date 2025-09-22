@@ -7,6 +7,7 @@ import './App.css';
 import { main as musicMain } from './music_index';
 import { LiveMusicHelper } from './music_utils/LiveMusicHelper';
 
+import { useIsMobile } from './hooks/use-is-mobile';
 import { createNoise2D } from 'simplex-noise';
 
 const title = "PULSE.";
@@ -76,6 +77,7 @@ const letterVariants: Variants = {
 
 
 function App() {
+  const isMobile = useIsMobile();
   const pathRef = useRef<SVGPathElement>(null);
   const barRef = useRef<HTMLDivElement>(null);
   const animationFrameId = useRef<number>();
@@ -164,6 +166,7 @@ function App() {
   }, []);
 
   useEffect(() => {
+    if (isMobile) return;
     const animateWave = (timestamp: number) => {
       if (!pathRef.current || !barRef.current) return;
       const barRect = barRef.current.getBoundingClientRect();
@@ -194,7 +197,35 @@ function App() {
         cancelAnimationFrame(animationFrameId.current);
       }
     };
-  }, []);
+  }, [isMobile]);
+
+  if (isMobile) {
+    return (
+      <div className="App">
+        <motion.div
+          className="shader-container"
+          style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: -3 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 1 }}
+        >
+          <NeuroShaderCanvas />
+        </motion.div>
+        <div className="title-and-button-container" style={{ pointerEvents: 'none' }}>
+          <div className="center-title">
+            <motion.p
+              className="subtitle"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.5 }}
+            >
+              please use desktop.
+            </motion.p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="App">
