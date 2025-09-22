@@ -215,6 +215,11 @@ function App() {
           <div className="center-title">
             <motion.p
               className="subtitle"
+              style={{ 
+                color: 'white', 
+                mixBlendMode: 'normal',
+                textShadow: '0 0 8px black' 
+              }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1.5 }}
