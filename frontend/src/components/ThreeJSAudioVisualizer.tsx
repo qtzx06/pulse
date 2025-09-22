@@ -109,6 +109,35 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
         mesh.geometry.computeVertexNormals();
     };
 
+    let isDragging = false;
+    let previousMousePosition = { x: 0, y: 0 };
+
+    const onMouseDown = (event: MouseEvent) => {
+      isDragging = true;
+      previousMousePosition = { x: event.clientX, y: event.clientY };
+    };
+
+    const onMouseMove = (event: MouseEvent) => {
+      if (!isDragging) return;
+      const deltaX = event.clientX - previousMousePosition.x;
+      const deltaY = event.clientY - previousMousePosition.y;
+
+      group.rotation.y += deltaX * 0.005;
+      group.rotation.x += deltaY * 0.005;
+
+      previousMousePosition = { x: event.clientX, y: event.clientY };
+    };
+
+    const onMouseUp = () => {
+      isDragging = false;
+    };
+
+    currentMount.addEventListener('mousedown', onMouseDown);
+    currentMount.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+    currentMount.addEventListener('mouseleave', onMouseUp);
+
+
     const render = () => {
       analyser.getByteFrequencyData(dataArray);
       const averageFrequency = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
@@ -127,14 +156,10 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
         const lowerMaxFr = lowerMax / lowerHalfArray.length;
         const upperAvgFr = upperAvg / upperHalfArray.length;
 
-        distortMesh(mesh, modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), modulate(upperAvgFr, 0, 1, 0, 4));
-        group.rotation.y += 0.005;
+        distortMesh(mesh, modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 2, 8), modulate(upperAvgFr, 0, 1, 1, 4));
+        if (!isDragging) group.rotation.y += 0.005;
       } else {
-        const time = window.performance.now() * 0.0005;
-        const bassFr = Math.sin(time) * 0.5 + 0.5; // Oscillates between 0 and 1
-        const treFr = Math.cos(time * 0.5) * 0.25 + 0.25; // Oscillates between 0 and 0.5
-        distortMesh(mesh, modulate(bassFr, 0, 1, 0, 2), modulate(treFr, 0, 1, 0, 1));
-        group.rotation.y += 0.001;
+        if (!isDragging) group.rotation.y += 0.002;
       }
 
       renderer.render(scene, camera);
@@ -157,8 +182,14 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', onWindowResize);
-      if (currentMount && renderer.domElement) {
-        currentMount.removeChild(renderer.domElement);
+      window.removeEventListener('mouseup', onMouseUp);
+      if (currentMount) {
+        currentMount.removeEventListener('mousedown', onMouseDown);
+        currentMount.removeEventListener('mousemove', onMouseMove);
+        currentMount.removeEventListener('mouseleave', onMouseUp);
+        if (renderer.domElement) {
+          currentMount.removeChild(renderer.domElement);
+        }
       }
       scene.remove(group);
       geometry.dispose();
