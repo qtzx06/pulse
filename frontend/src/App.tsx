@@ -102,7 +102,7 @@ function App() {
     hidden: { opacity: 0 },
     glitchIn: {
       opacity: [0, 0.8, 0.2, 1, 0.5, 1],
-      transition: { duration: 0.8, delay: 0.2 }
+      transition: { duration: 0.2 }
     },
     idle: {
       opacity: [1, 0.4, 0.9, 0.6, 1],

@@ -109,35 +109,6 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
         mesh.geometry.computeVertexNormals();
     };
 
-    let isDragging = false;
-    let previousMousePosition = { x: 0, y: 0 };
-
-    const onMouseDown = (event: MouseEvent) => {
-      isDragging = true;
-      previousMousePosition = { x: event.clientX, y: event.clientY };
-    };
-
-    const onMouseMove = (event: MouseEvent) => {
-      if (!isDragging) return;
-      const deltaX = event.clientX - previousMousePosition.x;
-      const deltaY = event.clientY - previousMousePosition.y;
-
-      group.rotation.y += deltaX * 0.005;
-      group.rotation.x += deltaY * 0.005;
-
-      previousMousePosition = { x: event.clientX, y: event.clientY };
-    };
-
-    const onMouseUp = () => {
-      isDragging = false;
-    };
-
-    currentMount.addEventListener('mousedown', onMouseDown);
-    currentMount.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
-    currentMount.addEventListener('mouseleave', onMouseUp);
-
-
     const render = () => {
       analyser.getByteFrequencyData(dataArray);
       const averageFrequency = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
@@ -157,9 +128,9 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
         const upperAvgFr = upperAvg / upperHalfArray.length;
 
         distortMesh(mesh, modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 2, 8), modulate(upperAvgFr, 0, 1, 1, 4));
-        if (!isDragging) group.rotation.y += 0.005;
+        group.rotation.y += 0.005;
       } else {
-        if (!isDragging) group.rotation.y += 0.002;
+        // Idle state is now handled by Framer Motion in App.tsx
       }
 
       renderer.render(scene, camera);
@@ -182,14 +153,8 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', onWindowResize);
-      window.removeEventListener('mouseup', onMouseUp);
-      if (currentMount) {
-        currentMount.removeEventListener('mousedown', onMouseDown);
-        currentMount.removeEventListener('mousemove', onMouseMove);
-        currentMount.removeEventListener('mouseleave', onMouseUp);
-        if (renderer.domElement) {
-          currentMount.removeChild(renderer.domElement);
-        }
+      if (currentMount && renderer.domElement) {
+        currentMount.removeChild(renderer.domElement);
       }
       scene.remove(group);
       geometry.dispose();
@@ -205,7 +170,7 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
       const group = groupRef.current;
       const targetScale = 0.8;
       const duration = 1200;
-      const delay = 500;
+      const delay = 0;
       const startTime = performance.now() + delay;
       let animationFrameId: number;
 
