@@ -7,6 +7,7 @@ import './App.css';
 import { main as musicMain } from './music_index';
 import { LiveMusicHelper } from './music_utils/LiveMusicHelper';
 
+import MobileView from './components/MobileView';
 import { useIsMobile } from './hooks/use-is-mobile';
 import { createNoise2D } from 'simplex-noise';
 
@@ -200,36 +201,7 @@ function App() {
   }, [isMobile]);
 
   if (isMobile) {
-    return (
-      <div className="App">
-        <motion.div
-          className="shader-container"
-          style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: -3 }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 1 }}
-        >
-          <NeuroShaderCanvas />
-        </motion.div>
-        <div className="title-and-button-container" style={{ pointerEvents: 'none' }}>
-          <div className="center-title">
-            <motion.p
-              className="subtitle"
-              style={{ 
-                color: 'white', 
-                mixBlendMode: 'normal',
-                textShadow: '0 0 8px black' 
-              }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.5 }}
-            >
-              please use desktop.
-            </motion.p>
-          </div>
-        </div>
-      </div>
-    );
+    return <MobileView />;
   }
 
   return (
