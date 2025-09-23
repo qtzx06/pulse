@@ -7,8 +7,6 @@ import './App.css';
 import { main as musicMain } from './music_index';
 import { LiveMusicHelper } from './music_utils/LiveMusicHelper';
 
-import MobileView from './components/MobileView';
-import { useIsMobile } from './hooks/use-is-mobile';
 import { createNoise2D } from 'simplex-noise';
 
 const title = "PULSE.";
@@ -78,7 +76,6 @@ const letterVariants: Variants = {
 
 
 function App() {
-  const isMobile = useIsMobile();
   const pathRef = useRef<SVGPathElement>(null);
   const barRef = useRef<HTMLDivElement>(null);
   const animationFrameId = useRef<number>();
@@ -167,7 +164,6 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (isMobile) return;
     const animateWave = (timestamp: number) => {
       if (!pathRef.current || !barRef.current) return;
       const barRect = barRef.current.getBoundingClientRect();
@@ -198,11 +194,7 @@ function App() {
         cancelAnimationFrame(animationFrameId.current);
       }
     };
-  }, [isMobile]);
-
-  if (isMobile) {
-    return <MobileView />;
-  }
+  }, []);
 
   return (
     <div className="App">
@@ -297,7 +289,7 @@ function App() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 2.8 }}
               >
-                bigred//hacks winner.
+                a bigred//hacks winner.
               </motion.p>
             </motion.div>
           )}
