@@ -249,7 +249,7 @@ function App() {
       </motion.div>
       <motion.div
         ref={barRef}
-        className="inverter-bar"
+        className="inverter-bar-clipper"
         initial={{ y: 'calc(100vh + 150px)' }}
         animate={{
           y: isExpanded ? '0px' : 'calc(50vh + 100px)'
@@ -260,7 +260,9 @@ function App() {
           duration: 1.4,
           delay: isExpanded ? 0 : 1.5,
         }}
-      />
+      >
+        <div className="inverter-bar-content" />
+      </motion.div>
       <div className="title-and-button-container">
         <AnimatePresence>
           {!isExpanded && (
