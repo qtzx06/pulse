@@ -45,7 +45,7 @@
   border: none;
   outline: none;
   color: rgba(255, 255, 255, 0.95);
-  font-size: 0.5rem;
+  font-size: 1.2rem;
   font-weight: 400;
   font-family: 'Geist Mono', monospace;
   transition: color 0.3s ease;
@@ -58,7 +58,7 @@
   top: 50%;
   transform: translateY(-50%);
   font-family: "Geist Mono", monospace;
-  font-size: 0.5rem;
+  font-size: 1.2rem;
   color: rgba(255, 255, 255, 0.5);
   z-index: 1;
   pointer-events: none;
