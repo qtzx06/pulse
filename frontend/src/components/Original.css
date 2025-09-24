@@ -1,13 +1,10 @@
 /* Merged and Adapted Styles for ChatInput */
 
 .search-container {
-  width: 90%;
-  max-width: 700px;
-  margin-left: auto;
-  margin-right: auto;
-  position: relative; /* Keep for internal positioning */
-  left: 0; /* Reset any inherited left positioning */
-  right: 0; /* Reset any inherited right positioning */
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  position: relative; /* Keep for internal element positioning */
 }
 
 .search-field-wrapper {
@@ -15,6 +12,7 @@
   display: flex;
   align-items: center;
   width: 100%;
+  max-width: 700px;
   padding: 10px;
   border-radius: 50px; /* Rounded ends */
   background: transparent;
@@ -149,6 +147,9 @@
 }
 
 @media (max-width: 768px) {
+  .search-field-wrapper {
+    padding: 5px;
+  }
   .search-input, .placeholder-animation {
     font-size: 1rem;
   }

@@ -76,7 +76,9 @@
   position: absolute;
   top: 75%;
   left: 0;
-  right: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
   z-index: 3;
   pointer-events: all;
 }
@@ -88,5 +90,6 @@
 
   .center-button {
     width: 80%;
+    left: 10%;
   }
 }
