@@ -60,7 +60,7 @@
 
 .subtitle {
   position: absolute;
-  top: 65%; /* Moved down slightly */
+  top: 57%;
   left: 50%;
   transform: translate(-50%, -50%);
   font-family: "Geist", sans-serif;
@@ -86,6 +86,13 @@
 @media (max-width: 768px) {
   .center-title {
     font-size: 6rem;
+  }
+
+  .subtitle {
+    width: 100%;
+    text-align: center;
+    left: 50%;
+    transform: translateX(-50%);
   }
 
   .center-button {
