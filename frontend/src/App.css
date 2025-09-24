@@ -92,4 +92,8 @@
     width: 80%;
     left: 10%;
   }
+
+  .inverter-bar {
+    will-change: transform;
+  }
 }
