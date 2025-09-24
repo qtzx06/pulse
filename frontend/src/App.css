@@ -26,7 +26,7 @@
   mix-blend-mode: difference;
   z-index: 1;
   clip-path: url(#wave-clip);
-  isolation: isolate;
+  transform: translate3d(0, 0, 0);
 }
 
 .clip-svg {
