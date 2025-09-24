@@ -223,6 +223,9 @@ function App() {
           <clipPath id="wave-clip">
             <path ref={pathRef} d={`M 0 0 L ${window.innerWidth} 0 L ${window.innerWidth} ${window.innerHeight} L 0 ${window.innerHeight} Z`} />
           </clipPath>
+          <filter id="inverse-filter">
+            <feColorMatrix in="SourceGraphic" type="matrix" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0" />
+          </filter>
         </defs>
       </svg>
       <motion.div
