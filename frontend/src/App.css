@@ -26,7 +26,6 @@
   mix-blend-mode: difference;
   z-index: 1;
   clip-path: url(#wave-clip);
-  transform: translate3d(0, 0, 0);
 }
 
 .clip-svg {
@@ -48,7 +47,7 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) translate3d(0, 0, 0);
+  transform: translate(-50%, -50%);
   font-family: "Geist", sans-serif;
   font-size: 15rem;
   font-weight: 50;
@@ -63,7 +62,7 @@
   position: absolute;
   top: 65%; /* Moved down slightly */
   left: 50%;
-  transform: translate(-50%, -50%) translate3d(0, 0, 0);
+  transform: translate(-50%, -50%);
   font-family: "Geist", sans-serif;
   font-size: 1rem;
   font-weight: 400;
@@ -92,9 +91,5 @@
   .center-button {
     width: 80%;
     left: 10%;
-  }
-
-  .inverter-bar {
-    -webkit-mask-image: -webkit-radial-gradient(white, black);
   }
 }
