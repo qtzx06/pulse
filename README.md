@@ -4,7 +4,7 @@ people's choice winner at cornell's bigredhacks 2025. an immersive audio-visual 
 
 | dubs | demo & ui/ux |
 | :---: | :---: |
-| <img src="media/bigredwin.png" alt="bigredhacks winner" width="230"> | <a href="https://www.youtube.com/watch?v=bwiFqrOQw84"><img src="media/demo.gif" alt="pulse demo" width="470"></a> |
+| <img src="media/bigredwin.png" alt="bigredhacks winner" width="250"> | <a href="https://www.youtube.com/watch?v=bwiFqrOQw84"><img src="media/demo.gif" alt="pulse demo" width="500"></a> |
 
 ## devpost
 
