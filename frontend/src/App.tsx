@@ -268,6 +268,7 @@ function App() {
               key="title-group"
               exit={{ opacity: 1 }}
               transition={{ duration: 0.3, delay: 0.1 }}
+              style={{ pointerEvents: 'all' }}
             >
               <motion.div
                 className="center-title"
@@ -286,14 +287,17 @@ function App() {
                   </motion.span>
                 ))}
               </motion.div>
-              <motion.p
+              <motion.a
+                href="https://devpost.com/software/pulse-4rpujf"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="subtitle"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 2.8 }}
               >
                 a bigred//hacks winner.
-              </motion.p>
+              </motion.a>
             </motion.div>
           )}
         </AnimatePresence>
