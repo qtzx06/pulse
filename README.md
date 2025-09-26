@@ -1,6 +1,6 @@
 # pulse
 
-people's choice winner at cornell's bigredhacks 2025. an immersive audio-visual experience that transforms your hums into music. click on the gif below for a full demo on [youtube](https://www.youtube.com/watch?v=bwiFqrOQw84)!
+an immersive audio-visual experience that transforms your hums into music. top-voted people's choice winner at cornell's bigredhacks 2025. click on the gif below for a full demo on [youtube](https://www.youtube.com/watch?v=bwiFqrOQw84)!
 
 | dubs | demo & ui/ux |
 | :---: | :---: |
