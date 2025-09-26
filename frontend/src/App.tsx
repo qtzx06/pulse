@@ -288,7 +288,7 @@ function App() {
                 ))}
               </motion.div>
               <motion.a
-                href="https://devpost.com/software/pulse-4rpujf"
+                href="https://github.com/qtzx06/pulse"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="subtitle"
