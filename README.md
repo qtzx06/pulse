@@ -6,7 +6,7 @@ an immersive audio-visual experience that transforms your hums into music. top-v
 | :---: | :---: |
 | <img src="media/bigredwin.png" alt="bigredhacks winner" width="250"> | <a href="https://www.youtube.com/watch?v=bwiFqrOQw84"><img src="media/demo.gif" alt="pulse demo" width="500"></a> |
 
-## devpost
+## about
 
 ### inspiration
 
