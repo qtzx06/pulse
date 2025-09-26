@@ -1,6 +1,6 @@
 # pulse
 
-an immersive audio-visual experience that transforms your hums into music. click below for a full demo!
+an immersive audio-visual experience that transforms your hums into music. click on the gif for a full demo on [youtube](https://www.youtube.com/watch?v=bwiFqrOQw84)!
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=bwiFqrOQw84">
