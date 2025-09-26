@@ -1,12 +1,10 @@
 # pulse
 
-an immersive audio-visual experience that transforms your hums into music. click on the gif for a full demo on [youtube](https://www.youtube.com/watch?v=bwiFqrOQw84)!
+people's choice winner at cornell's bigredhacks 2025. an immersive audio-visual experience that transforms your hums into music. click on the gif below for a full demo on [youtube](https://www.youtube.com/watch?v=bwiFqrOQw84)!
 
-<p align="center">
-  <a href="https://www.youtube.com/watch?v=bwiFqrOQw84">
-    <img src="media/demo.gif" alt="pulse demo">
-  </a>
-</p>
+| dubs | demo & ui/ux |
+| :---: | :---: |
+| <img src="media/bigredwin.png" alt="bigredhacks winner" width="230"> | <a href="https://www.youtube.com/watch?v=bwiFqrOQw84"><img src="media/demo.gif" alt="pulse demo" width="470"></a> |
 
 ## devpost
 
