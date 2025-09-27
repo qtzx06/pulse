@@ -46,6 +46,21 @@ export function main() {
     // toastMessage.show(filteredPrompt.filteredReason!)
     // pdjMidi.addFilteredPrompt(filteredPrompt.text!);
     console.log(`Filtered prompt: ${filteredPrompt.text}, Reason: ${filteredPrompt.filteredReason}`);
+    
+    // Fallback to Dubstep
+    const fallbackPrompt = DEFAULT_PROMPTS.find(p => p.text === 'Dubstep');
+    if (fallbackPrompt) {
+      const newPrompts = new Map<string, Prompt>();
+      const promptId = `prompt-${DEFAULT_PROMPTS.indexOf(fallbackPrompt)}`;
+      newPrompts.set(promptId, {
+        promptId,
+        text: fallbackPrompt.text,
+        weight: 1.0,
+        cc: DEFAULT_PROMPTS.indexOf(fallbackPrompt),
+        color: fallbackPrompt.color,
+      });
+      liveMusicHelper.setWeightedPrompts(newPrompts);
+    }
   }));
 
   const errorToast = ((e: Event) => {
