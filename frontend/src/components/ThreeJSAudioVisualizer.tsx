@@ -127,7 +127,7 @@ const ThreeJSAudioVisualizer: React.FC<ThreeJSAudioVisualizerProps> = ({ analyse
         const lowerMaxFr = lowerMax / lowerHalfArray.length;
         const upperAvgFr = upperAvg / upperHalfArray.length;
 
-        distortMesh(mesh, modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 2, 8), modulate(upperAvgFr, 0, 1, 1, 4));
+        distortMesh(mesh, modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 1, 4), modulate(upperAvgFr, 0, 1, 0.5, 2));
         group.rotation.y += 0.005;
       } else {
         // Idle state is now handled by Framer Motion in App.tsx
