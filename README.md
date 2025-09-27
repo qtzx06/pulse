@@ -14,4 +14,4 @@ pulse transforms your random musical thoughts into real-time audiovisual experie
 
 ... read more on the [devpost](https://devpost.com/software/pulse-4rpujf)!
 
-also if your prompt is bad then the model will default to dubstep. sorry.
+also if your prompt is copyright or like bad then the model will default to dubstep. sorry.
