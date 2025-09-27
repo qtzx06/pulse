@@ -23,7 +23,7 @@ export class LiveMusicHelper extends EventTarget {
 
   private filteredPrompts = new Set<string>();
   private nextStartTime = 0;
-  private bufferTime = 2;
+  private bufferTime = 4;
 
   public readonly audioContext: AudioContext;
   public readonly analyser: AnalyserNode;
@@ -98,19 +98,30 @@ export class LiveMusicHelper extends EventTarget {
     const source = this.audioContext.createBufferSource();
     source.buffer = audioBuffer;
     source.connect(this.outputNode);
+
     if (this.nextStartTime === 0) {
       this.nextStartTime = this.audioContext.currentTime + this.bufferTime;
       setTimeout(() => {
-        this.setPlaybackState('playing');
+        // Only set to playing if we are still in the loading phase.
+        if (this.playbackState === 'loading') {
+            this.setPlaybackState('playing');
+        }
       }, this.bufferTime * 1000);
     }
+
+    // Determine the correct start time.
+    // It should be the later of the scheduled time or the current time.
+    // This prevents gaps and ensures continuous playback even if we fall behind schedule.
+    const startTime = Math.max(this.nextStartTime, this.audioContext.currentTime);
+    
     if (this.nextStartTime < this.audioContext.currentTime) {
-      this.setPlaybackState('loading');
-      this.nextStartTime = 0;
-      return;
+        console.warn('Audio buffer underrun. Rescheduling to play immediately to avoid a gap.');
     }
-    source.start(this.nextStartTime);
-    this.nextStartTime += audioBuffer.duration;
+
+    source.start(startTime);
+
+    // The next chunk should start immediately after this one finishes.
+    this.nextStartTime = startTime + audioBuffer.duration;
   }
 
   public get activePrompts() {

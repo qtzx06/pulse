@@ -4,14 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { parsePromptWithGemini } from './controlAgent';
 import type { PlaybackState, Prompt } from './music_types';
 import { GoogleGenAI, LiveMusicFilteredPrompt } from '@google/genai';
 import { LiveMusicHelper } from './music_utils/LiveMusicHelper';
 import { AudioAnalyser } from './music_utils/AudioAnalyser';
 
 const musicAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY, apiVersion: 'v1alpha' });
-const textAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const model = 'lyria-realtime-exp';
 
 export function main() {
@@ -68,38 +66,32 @@ export function main() {
 
   const updateFirstPrompt = async (text: string) => {
     if (text) {
-      const promptTexts = DEFAULT_PROMPTS.map(p => p.text);
-      const controlParams = await parsePromptWithGemini(textAI, text, promptTexts);
-      console.log("Received Control Params:", controlParams);
+      // Create a new prompt map with only the user's prompt.
+      const userPrompt: Prompt = {
+        promptId: 'prompt-user',
+        text: text,
+        weight: 1.0,
+        cc: 0, // Control Change, can be a default value
+        color: '#FFFFFF', // A default color
+      };
+      const newPrompts = new Map<string, Prompt>();
+      newPrompts.set(userPrompt.promptId, userPrompt);
 
-      if (controlParams && controlParams.prompts && Array.isArray(controlParams.prompts)) {
-        // Turn off all prompts first to create a clean slate
-        prompts.forEach(p => p.weight = 0);
+      // Set the user's prompt.
+      liveMusicHelper.setWeightedPrompts(newPrompts);
+      
+      // Define the hard-coded music generation configuration.
+      const config = {
+        bpm: 120,
+        scale: 'G_MAJOR_E_MINOR',
+        guidance: 3.5,
+        density: 0.7,
+        brightness: 0.7,
+      };
 
-        // Set weights for the prompts returned by the agent
-        controlParams.prompts.forEach((agentPrompt: { prompt_name: string, weight: number }) => {
-          const targetPrompt = [...prompts.values()].find(p => p.text === agentPrompt.prompt_name);
-          if (targetPrompt) {
-            targetPrompt.weight = agentPrompt.weight;
-            prompts.set(targetPrompt.promptId, targetPrompt);
-          }
-        });
-
-        // Update the UI and the music model with the new mix
-        const newPrompts = new Map(prompts);
-        // pdjMidi.updatePrompts(newPrompts);
-        liveMusicHelper.setWeightedPrompts(newPrompts);
-        
-        const config: any = {};
-        if (controlParams.bpm) config.bpm = controlParams.bpm;
-        if (controlParams.density) config.density = controlParams.density;
-        if (controlParams.brightness) config.brightness = controlParams.brightness;
-
-        if (Object.keys(config).length > 0) {
-          console.log("Updating Music Config:", config);
-          liveMusicHelper.updateMusicConfig(config, !!config.bpm);
-        }
-      }
+      // Update the music configuration, resetting the context because bpm and scale are changing.
+      console.log("Updating Music Config:", config);
+      liveMusicHelper.updateMusicConfig(config, true);
     }
   };
 
