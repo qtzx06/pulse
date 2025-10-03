@@ -141,14 +141,14 @@ function App() {
     }
   }, []);
 
-  const handleSend = (text: string) => {
+  const handleSend = async (text: string) => {
     setIsExpanded(true);
-    if (updatePromptRef.current) {
-      updatePromptRef.current(text);
-    }
-    if (!musicStarted && musicHelperRef.current) {
-      musicHelperRef.current.play();
-      setMusicStarted(true);
+    if (updatePromptRef.current && musicHelperRef.current) {
+      if (!musicStarted) {
+        await musicHelperRef.current.play();
+        setMusicStarted(true);
+      }
+      await updatePromptRef.current(text);
     }
   };
 

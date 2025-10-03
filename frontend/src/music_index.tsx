@@ -92,9 +92,6 @@ export function main() {
       const newPrompts = new Map<string, Prompt>();
       newPrompts.set(userPrompt.promptId, userPrompt);
 
-      // Set the user's prompt.
-      liveMusicHelper.setWeightedPrompts(newPrompts);
-      
       // Define the hard-coded music generation configuration.
       const config = {
         bpm: 120,
@@ -106,7 +103,13 @@ export function main() {
 
       // Update the music configuration, resetting the context because bpm and scale are changing.
       console.log("Updating Music Config:", config);
-      liveMusicHelper.updateMusicConfig(config, true);
+      await liveMusicHelper.updateMusicConfig(config, true);
+
+      // Wait for the reset to complete on the server before sending the new prompt.
+      await new Promise(resolve => setTimeout(resolve, 250));
+
+      // Set the user's prompt.
+      await liveMusicHelper.setWeightedPrompts(newPrompts);
     }
   };
 
